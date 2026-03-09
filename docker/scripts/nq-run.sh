@@ -3,41 +3,6 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
-_have_docker_access() {
-  # returns: 0 OK, 10 permission denied, 20 daemon not running, 30 unknown
-  local out rc
-  out="$(docker info 2>&1)" && rc=0 || rc=$?
-  if [ $rc -eq 0 ]; then
-    return 0
-  fi
-  echo "$out" | grep -qi 'permission denied.*docker\.sock' && return 10
-  echo "$out" | grep -qiE 'cannot connect to the docker daemon|is the docker daemon running|connect: connection refused' && return 20
-  return 30
-}
-
-_ensure_docker_or_rerun() {
-_ensure_docker_or_rerun
-  case $? in
-    0) return 0 ;;
-    10)
-      echo "WARN: sin permisos a /var/run/docker.sock en esta sesión."
-      echo "INFO: re-ejecutando automáticamente con newgrp docker..."
-      newgrp docker -c "cd '$ROOT' && ./scripts/nq-run.sh" || exit $?
-      exit 0
-      ;;
-    20)
-      echo "ERROR: Docker daemon no está corriendo (docker info falla por daemon)."
-      echo "ACCION: inicia docker y reintenta."
-      exit 1
-      ;;
-    *)
-      echo "ERROR: Docker no responde (motivo desconocido)."
-      echo "SALIDA docker info:"
-      docker info || true
-      exit 1
-      ;;
-  esac
-}
 cd "$ROOT"
 
 _die() { echo "ERROR: $*" >&2; exit 1; }
