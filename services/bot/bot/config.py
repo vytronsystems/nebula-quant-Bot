@@ -3,6 +3,10 @@ import os
 def env(name: str, default: str) -> str:
     return os.getenv(name, default)
 
+# Single source of truth for DB connection (psycopg runtime)
+# See docs/15_DB_ACCESS_STANDARD.md
+PG_DSN = env("PG_DSN", "postgresql://nebula:nebula123@postgres:5432/trading")
+
 NQ_ENV = env("NQ_ENV", "local")
 NQ_VERSION = env("NQ_VERSION", "dev")
 NQ_SYMBOL = env("NQ_SYMBOL", "QQQ")

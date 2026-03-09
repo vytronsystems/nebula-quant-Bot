@@ -1,10 +1,11 @@
-import os
 import uuid
 import json
 import hashlib
 from datetime import datetime
 
 import psycopg
+
+from bot.config import PG_DSN
 
 
 def _utcnow():
@@ -17,7 +18,7 @@ def _policy_hash_stub() -> str:
 
 
 def start_run(env: str = "local", version: str = "dev") -> str:
-    dsn = os.getenv("PG_DSN", "postgresql://nebula:nebula123@postgres:5432/trading")
+    dsn = PG_DSN
     run_id = str(uuid.uuid4())
     now = _utcnow()
 
@@ -36,7 +37,7 @@ def start_run(env: str = "local", version: str = "dev") -> str:
 
 
 def end_run(run_id: str, status: str = "success") -> None:
-    dsn = os.getenv("PG_DSN", "postgresql://nebula:nebula123@postgres:5432/trading")
+    dsn = PG_DSN
     now = _utcnow()
 
     with psycopg.connect(dsn) as conn:
@@ -54,7 +55,7 @@ def end_run(run_id: str, status: str = "success") -> None:
 
 
 def log_no_trade(run_id: str, symbol: str = "QQQ", timeframe: str = "5m") -> None:
-    dsn = os.getenv("PG_DSN", "postgresql://nebula:nebula123@postgres:5432/trading")
+    dsn = PG_DSN
     now = _utcnow()
 
     snap_id = str(uuid.uuid4())
