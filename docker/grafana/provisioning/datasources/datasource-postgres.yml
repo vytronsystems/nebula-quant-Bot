@@ -1,0 +1,18 @@
+apiVersion: 1
+
+datasources:
+  - name: Postgres-NEBULA
+    uid: Postgres-NEBULA
+    type: postgres
+    access: proxy
+    isDefault: true
+    editable: true
+    url: postgres:5432
+    user: nebula
+    secureJsonData:
+      password: nebula123
+    jsonData:
+      database: trading
+      sslmode: "disable"
+      postgresVersion: 1600
+      timescaledb: false

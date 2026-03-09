@@ -1,0 +1,20 @@
+groups:
+- name: nebula-quant
+  rules:
+  - alert: BotDown
+    expr: up{job="bot"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "NEBULA-QUANT bot DOWN"
+      description: "Prometheus cannot scrape bot:8080 /metrics for > 1m"
+
+  - alert: PostgresExporterDown
+    expr: up{job="postgres"} == 0
+    for: 1m
+    labels:
+      severity: critical
+    annotations:
+      summary: "Postgres exporter DOWN"
+      description: "Cannot scrape postgres-exporter for > 1m"

@@ -1,0 +1,80 @@
+services:
+  postgres:
+    image: postgres:16
+    container_name: nq-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: nebula
+      POSTGRES_PASSWORD: nebula123
+      POSTGRES_DB: trading
+    ports:
+      - "5432:5432"
+    volumes:
+      - ../logs/postgres:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "nebula", "-d", "trading"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+
+  redis:
+    image: redis:7
+    container_name: nq-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - ../logs/redis:/data
+    command: ["redis-server", "--appendonly", "yes"]
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+
+  grafana:
+    image: grafana/grafana
+    container_name: nq-grafana
+    user: "472"
+    restart: always
+    ports:
+      - "3000:3000"
+    volumes:
+      - ../logs/grafana:/var/lib/grafana
+    networks:
+      - default
+
+  bot:
+    build:
+      context: ../services/bot
+    container_name: nq-bot
+    restart: always
+    environment:
+      PG_DSN: postgresql://nebula:nebula123@postgres:5432/trading
+      REDIS_HOST: redis
+      PYTHONPATH: /app
+      NQ_ENV: local
+      NQ_VERSION: dev
+      NQ_SYMBOL: QQQ
+      NQ_TIMEFRAME: 5m
+      HEARTBEAT_SECONDS: "10"
+      SNAPSHOT_EVERY_N_HEARTBEATS: "6"
+    volumes:
+      - ../services/bot:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          "python -c \"import socket; socket.gethostbyname('postgres'); socket.gethostbyname('redis'); print('ok')\""
+        ]
+      interval: 15s
+      timeout: 5s
+      retries: 10
+      start_period: 20s

@@ -1,0 +1,87 @@
+{
+  "uid": "nebula-quant-overview",
+  "title": "NEBULA-QUANT | Overview",
+  "tags": [
+    "nebula-quant",
+    "ops"
+  ],
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "10s",
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "DecisionSnapshots / minuto",
+      "gridPos": {
+        "x": 0,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "Postgres-NEBULA"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "select date_trunc('minute', created_at) as time, count(*) as value\nfrom decision_snapshots\nwhere $__timeFilter(created_at)\ngroup by 1\norder by 1;"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "BotRuns / d\u00eda",
+      "gridPos": {
+        "x": 12,
+        "y": 0,
+        "w": 12,
+        "h": 8
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "Postgres-NEBULA"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "time_series",
+          "rawQuery": true,
+          "rawSql": "select date_trunc('day', started_at) as time, count(*) as value\nfrom bot_runs\nwhere $__timeFilter(started_at)\ngroup by 1\norder by 1;"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "\u00daltimos 20 snapshots",
+      "gridPos": {
+        "x": 0,
+        "y": 8,
+        "w": 24,
+        "h": 10
+      },
+      "datasource": {
+        "type": "grafana-postgresql-datasource",
+        "uid": "Postgres-NEBULA"
+      },
+      "targets": [
+        {
+          "refId": "A",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "select created_at as \"time\", symbol, timeframe, decision, reason_code\nfrom decision_snapshots\norder by created_at desc\nlimit 20;"
+        }
+      ],
+      "options": {
+        "showHeader": true
+      }
+    }
+  ]
+}

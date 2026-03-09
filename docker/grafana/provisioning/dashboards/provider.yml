@@ -1,0 +1,13 @@
+apiVersion: 1
+
+providers:
+  - name: "NEBULA-QUANT"
+    orgId: 1
+    folder: "NEBULA-QUANT"
+    type: file
+    disableDeletion: true
+    editable: true
+    updateIntervalSeconds: 10
+    options:
+      path: /etc/grafana/dashboards
+      foldersFromFilesStructure: false

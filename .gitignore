@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.venv/
+venv/
+
+# Secrets
+.env
+*.env
+apikey_cursor.txt
+
+# Logs
+logs/
+*.log
+
+# OS / Editor
+.DS_Store
+.vscode/
+.idea/
+
+# Docker runtime artifacts
+docker/artifacts/
+docker/reports/
+
+# Temporary
+tmp/
+*.tmp
