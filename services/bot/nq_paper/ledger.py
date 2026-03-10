@@ -1,8 +1,10 @@
-# NEBULA-QUANT v1 | nq_paper ledger — paper bookkeeping (skeleton)
+# NEBULA-QUANT v1 | nq_paper ledger — paper bookkeeping (real, in-memory)
+
+from __future__ import annotations
 
 from typing import Any
 
-from nq_paper.models import PaperPosition, PaperTrade, PaperAccountState
+from nq_paper.models import PaperAccountState, PaperPosition, PaperTrade
 
 
 def open_paper_position(
@@ -14,18 +16,19 @@ def open_paper_position(
     **kwargs: Any,
 ) -> PaperPosition:
     """
-    Skeleton: open a paper position. Safe defaults; no external persistence.
+    Open a paper position. In-memory only; deterministic.
+    Caller is responsible for updating cash (deduct cost for long, add proceeds for short).
     """
-    _ = kwargs
+    qty = qty if qty > 0 else 0.0
     return PaperPosition(
         symbol=symbol or "QQQ",
         side=side,
-        qty=qty if qty > 0 else 0.0,
+        qty=qty,
         avg_price=price,
         opened_ts=ts,
         unrealized_pnl=0.0,
         realized_pnl=0.0,
-        metadata={"skeleton": True},
+        metadata=dict(kwargs.get("metadata", {})),
     )
 
 
@@ -34,18 +37,25 @@ def close_paper_position(
     exit_price: float = 0.0,
     exit_ts: float = 0.0,
     reason: str = "",
+    strategy_id: str = "",
+    trade_id: str = "",
     **kwargs: Any,
 ) -> PaperTrade | None:
     """
-    Skeleton: close a paper position and return a PaperTrade. Safe on None/empty.
+    Close a paper position and return a PaperTrade (gross pnl; caller applies commission).
+    Safe on None. Deterministic.
     """
-    _ = kwargs
-    if position is None:
+    if position is None or position.qty <= 0:
         return None
-    pnl = (exit_price - position.avg_price) * position.qty if position.side == "long" else (position.avg_price - exit_price) * position.qty
-    pnl_pct = (pnl / (position.avg_price * position.qty)) * 100.0 if position.qty and position.avg_price else 0.0
+    if position.side == "long":
+        pnl_gross = (exit_price - position.avg_price) * position.qty
+    else:
+        pnl_gross = (position.avg_price - exit_price) * position.qty
+    entry_value = position.avg_price * position.qty
+    pnl_pct = (pnl_gross / entry_value * 100.0) if entry_value else 0.0
+    tid = trade_id or f"pt_{int(exit_ts)}"
     return PaperTrade(
-        trade_id=f"pt_{int(exit_ts)}",
+        trade_id=tid,
         symbol=position.symbol,
         side=position.side,
         qty=position.qty,
@@ -54,11 +64,11 @@ def close_paper_position(
         exit_ts=exit_ts,
         exit_price=exit_price,
         status="closed",
-        pnl=pnl,
+        pnl=pnl_gross,
         pnl_pct=pnl_pct,
-        reason=reason or "skeleton",
-        strategy_id="",
-        metadata={"skeleton": True},
+        reason=reason or "signal",
+        strategy_id=strategy_id,
+        metadata=dict(kwargs.get("metadata", {})),
     )
 
 
@@ -70,22 +80,23 @@ def update_account_state(
     **kwargs: Any,
 ) -> PaperAccountState:
     """
-    Skeleton: build paper account state. Safe on empty input.
+    Build paper account state from cash, open positions (with unrealized_pnl set), and closed trades.
+    Equity = cash + sum(position value) where value = avg_price * qty + unrealized_pnl.
+    Safe on empty input.
     """
-    _ = kwargs
     positions = positions or []
     closed_trades = closed_trades or []
-    equity = cash + sum(
-        (p.avg_price * p.qty + p.unrealized_pnl) for p in positions
-    )
-    used = sum(p.avg_price * p.qty for p in positions)
+    position_value = sum(p.avg_price * p.qty + getattr(p, "unrealized_pnl", 0.0) for p in positions)
+    equity = cash + position_value
+    used_buying_power = sum(p.avg_price * p.qty for p in positions)
+    available_buying_power = max(0.0, equity - used_buying_power)
     return PaperAccountState(
         cash=cash,
         equity=equity,
-        used_buying_power=used,
-        available_buying_power=max(0.0, equity - used),
-        open_positions=positions,
-        closed_trades=closed_trades,
+        used_buying_power=used_buying_power,
+        available_buying_power=available_buying_power,
+        open_positions=list(positions),
+        closed_trades=list(closed_trades),
         updated_ts=ts,
-        metadata={"skeleton": True},
+        metadata=dict(kwargs.get("metadata", {})),
     )

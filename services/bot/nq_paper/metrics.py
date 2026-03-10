@@ -1,10 +1,12 @@
-# NEBULA-QUANT v1 | nq_paper metrics — placeholder, safe defaults
+# NEBULA-QUANT v1 | nq_paper metrics — real calculations, safe on empty input
+
+from __future__ import annotations
 
 from nq_paper.models import PaperTrade
 
 
 def compute_paper_win_rate(trades: list[PaperTrade]) -> float:
-    """Placeholder: win rate. Returns 0.0 if trades empty."""
+    """Win rate from closed paper trades. Returns 0.0 if trades empty."""
     if not trades:
         return 0.0
     wins = sum(1 for t in trades if t.pnl > 0)
@@ -12,7 +14,7 @@ def compute_paper_win_rate(trades: list[PaperTrade]) -> float:
 
 
 def compute_paper_net_pnl(trades: list[PaperTrade]) -> float:
-    """Placeholder: sum of trade PnL. Returns 0.0 if trades empty."""
+    """Sum of trade PnL. Returns 0.0 if trades empty."""
     if not trades:
         return 0.0
     return sum(t.pnl for t in trades)
@@ -20,7 +22,7 @@ def compute_paper_net_pnl(trades: list[PaperTrade]) -> float:
 
 def compute_paper_drawdown(equity_curve: list[tuple[float, float]]) -> float:
     """
-    Placeholder: max drawdown from (ts, equity) pairs.
+    Max drawdown from (ts, equity) pairs.
     Returns 0.0 if curve empty or single point.
     """
     if len(equity_curve) < 2:
@@ -38,7 +40,7 @@ def compute_paper_drawdown(equity_curve: list[tuple[float, float]]) -> float:
 
 
 def compute_paper_basic_stats(trades: list[PaperTrade]) -> dict[str, float]:
-    """Placeholder: basic stats. Safe defaults when trades empty."""
+    """Basic stats from closed paper trades. Safe defaults when trades empty."""
     if not trades:
         return {
             "total_trades": 0,
