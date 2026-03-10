@@ -1,5 +1,7 @@
 # NEBULA-QUANT v1 | nq_backtest models
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Any
 
@@ -15,6 +17,7 @@ class BacktestConfig:
     slippage_bps: float
     start_ts: float
     end_ts: float
+    qty: float = 1.0  # default position size per trade
 
 
 @dataclass
