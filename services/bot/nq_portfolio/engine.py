@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Iterable, Optional, Sequence
+from typing import Iterable, List, Optional, Sequence
 
 from nq_portfolio.config import DEFAULT_PORTFOLIO_CASH
 from nq_portfolio.exposure import (
@@ -14,6 +14,7 @@ from nq_portfolio.exposure import (
 from nq_portfolio.models import (
     PortfolioAllocation,
     PortfolioDecision,
+    PortfolioDecisionType,
     PortfolioPosition,
     PortfolioSnapshot,
 )
@@ -95,8 +96,9 @@ class PortfolioEngine:
         - Does not mutate internal state.
         """
         return self.build_decision(
-            allowed=False,
-            reason="nq_portfolio skeleton: new positions disabled by default",
+            decision=PortfolioDecisionType.BLOCK,
+            reason_codes=["skeleton_default"],
+            message="nq_portfolio: new positions disabled by default",
             requested_position=requested_position,
         )
 
@@ -127,27 +129,22 @@ class PortfolioEngine:
 
     def build_decision(
         self,
-        allowed: bool,
-        reason: str,
+        decision: PortfolioDecisionType,
+        reason_codes: list[str],
+        message: str,
+        throttle_ratio: Optional[float] = None,
         requested_position: Optional[PortfolioPosition] = None,
     ) -> PortfolioDecision:
-        """
-        Helper to build a PortfolioDecision from basic inputs.
-
-        For now, adjusted_qty and adjusted_weight simply mirror the
-        requested position data when provided; otherwise they default to 0.0.
-        """
+        """Build a PortfolioDecision (gate result)."""
         adjusted_qty = requested_position.qty if requested_position else 0.0
         adjusted_weight = requested_position.weight if requested_position else 0.0
-
-        # Expose a minimal snapshot of current exposure at decision time
         exposures = build_exposure_summary(self._positions)
-
+        meta: dict = {"exposure": exposures, "adjusted_qty": adjusted_qty, "adjusted_weight": adjusted_weight}
         return PortfolioDecision(
-            allowed=allowed,
-            reason=reason,
-            adjusted_qty=adjusted_qty,
-            adjusted_weight=adjusted_weight,
-            metadata={"exposure": exposures},
+            decision=decision,
+            reason_codes=list(reason_codes),
+            message=message,
+            throttle_ratio=throttle_ratio,
+            metadata=meta,
         )
 

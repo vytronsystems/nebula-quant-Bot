@@ -22,3 +22,19 @@ DEFAULT_MAX_NET_EXPOSURE: float = 0.5
 # Maximum number of open positions in the portfolio.
 DEFAULT_MAX_POSITIONS: int = 50
 
+# --- Portfolio risk engine (governance) defaults ---
+
+from nq_portfolio.models import PortfolioLimits
+
+DEFAULT_PORTFOLIO_LIMITS: PortfolioLimits = PortfolioLimits(
+    max_portfolio_capital_usage_pct=0.95,
+    max_strategy_capital_usage_pct=0.25,
+    max_open_positions_total=50,
+    max_open_positions_per_strategy=10,
+    max_daily_drawdown_pct=0.05,
+    max_strategy_drawdown_pct=0.10,
+    warning_capital_usage_pct=0.80,
+    warning_open_positions_pct=0.85,
+    warning_drawdown_pct=0.03,
+)
+

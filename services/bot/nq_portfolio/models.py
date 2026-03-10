@@ -2,10 +2,19 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
+from enum import Enum
 from typing import Any, Dict, List, Optional
 
 
-# NEBULA-QUANT v1 | nq_portfolio — portfolio state models (skeleton)
+# NEBULA-QUANT v1 | nq_portfolio — portfolio state and governance models
+
+
+class PortfolioDecisionType(str, Enum):
+    """Final portfolio gate decision before nq_exec."""
+
+    ALLOW = "allow"
+    THROTTLE = "throttle"
+    BLOCK = "block"
 
 
 @dataclass(slots=True)
@@ -57,11 +66,93 @@ class PortfolioSnapshot:
 
 @dataclass(slots=True)
 class PortfolioDecision:
-    """Result of a portfolio-level decision for a requested position change."""
+    """Result of the portfolio approval gate (final gate before nq_exec)."""
 
-    allowed: bool
-    reason: str
-    adjusted_qty: float = 0.0
-    adjusted_weight: float = 0.0
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    decision: PortfolioDecisionType
+    reason_codes: List[str]
+    message: str
+    throttle_ratio: Optional[float] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+    def __post_init__(self) -> None:
+        if self.metadata is None:
+            object.__setattr__(self, "metadata", {})
+
+    @property
+    def allowed(self) -> bool:
+        """True only when decision is ALLOW (backward compat)."""
+        return self.decision == PortfolioDecisionType.ALLOW
+
+    @property
+    def reason(self) -> str:
+        """Alias for message (backward compat)."""
+        return self.message
+
+
+# --- Governance models (portfolio risk engine) ---
+
+
+@dataclass(slots=True)
+class PortfolioLimits:
+    """Portfolio and strategy limits for the approval gate."""
+
+    max_portfolio_capital_usage_pct: float = 0.95
+    max_strategy_capital_usage_pct: float = 0.25
+    max_open_positions_total: int = 50
+    max_open_positions_per_strategy: int = 10
+    max_daily_drawdown_pct: float = 0.05
+    max_strategy_drawdown_pct: float = 0.10
+    warning_capital_usage_pct: float = 0.80
+    warning_open_positions_pct: float = 0.85
+    warning_drawdown_pct: float = 0.03
+
+
+@dataclass(slots=True)
+class StrategyAllocation:
+    """Per-strategy allocation and execution eligibility."""
+
+    strategy_id: str
+    allocated_capital: float = 0.0
+    used_capital: float = 0.0
+    max_positions: int = 10
+    strategy_enabled: bool = True
+    strategy_lifecycle_state: str = "paper"  # paper | live only for execution
+
+
+@dataclass(slots=True)
+class PositionSnapshot:
+    """Snapshot of a single open position for governance."""
+
+    position_id: str
+    strategy_id: str
+    symbol: str
+    notional_value: float = 0.0
+    unrealized_pnl: float = 0.0
+    realized_pnl: float = 0.0
+
+
+@dataclass(slots=True)
+class PortfolioState:
+    """Current portfolio state for the approval gate."""
+
+    portfolio_equity: float = 0.0
+    cash_available: float = 0.0
+    open_positions: List[PositionSnapshot] = field(default_factory=list)
+    strategy_allocations: List[StrategyAllocation] = field(default_factory=list)
+    realized_pnl: float = 0.0
+    unrealized_pnl: float = 0.0
+    daily_pnl: float = 0.0
+    strategy_daily_pnl: Dict[str, float] = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class OrderIntent:
+    """Order intent to be evaluated by the portfolio gate."""
+
+    strategy_id: str
+    symbol: str
+    requested_notional: float = 0.0
+    requested_quantity: float = 0.0
+    side: str = ""
+    timestamp: float = 0.0
 
