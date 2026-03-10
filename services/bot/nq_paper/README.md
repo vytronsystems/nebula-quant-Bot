@@ -1,29 +1,43 @@
-# nq_paper — Paper Trading (Skeleton)
+# nq_paper — Paper Trading (Real Engine)
 
 ## Purpose
 
-`nq_paper` provides the architectural foundation for paper trading simulation in NEBULA-QUANT: paper positions, paper trades, and session results that can be tracked and audited. It is **paper trading infrastructure only**: no broker connection, no real orders, no live execution.
+`nq_paper` provides simulated paper trading for NEBULA-QUANT: bar-by-bar paper sessions, in-memory positions and trades, and session results for audit and promotion decisions. It is **paper/simulated only**: no broker connection, no real orders, no live execution.
 
-## Role in the Pipeline
+## What Is Implemented
 
-The pipeline is:
+- **Bar-by-bar simulation**: `run_session(bars, strategy)` iterates over bar-like data, evaluates strategy per bar (callable or `on_bar(bar)`), and applies signals sequentially.
+- **Strategy interface**: LONG / SHORT / EXIT / HOLD; same normalization as nq_backtest (works with `nq_strategy.Signal` or strings).
+- **Paper positions**: One position at a time; open long on LONG (when flat), short on SHORT (when flat); close on EXIT or opposite signal. Fill at bar close with configurable commission and slippage (bps). Mark-to-market each bar (unrealized PnL).
+- **Ledger**: `open_paper_position()`, `close_paper_position()`, `update_account_state()` — in-memory, deterministic; caller applies commission to cash and to stored trade PnL.
+- **Account state**: Cash, equity, used/available buying power, open positions, closed trades, updated_ts.
+- **Session result**: `PaperSessionResult` with session_id, started_ts, ended_ts, trades (closed), positions (open at end), account_state, summary (total_trades, net_pnl, win_rate, max_drawdown), metadata.
+- **Metrics**: `compute_paper_win_rate`, `compute_paper_net_pnl`, `compute_paper_drawdown`, `compute_paper_basic_stats` on closed trades and equity curve; safe on empty input.
+- **Reporter**: `build_paper_summary(result)` returns dict with session_id, started_ts, ended_ts, cash, equity, total_trades, closed_trades, open_positions, net_pnl, win_rate, max_drawdown. No persistence or file output.
 
-```
-nq_data → nq_strategy → nq_risk → nq_backtest → nq_walkforward → nq_paper → nq_exec
-```
+## Current Limitations
 
-- **nq_paper** sits after walk-forward validation. Strategies that pass backtest and walk-forward run in paper mode with simulated fills and positions. Results feed weekly audit and promotion decisions toward live trading.
-- A strategy is not promoted to live unless paper trading confirms the edge under weekly audit (see Weekly Audit Standard and Research Framework).
+- **One position at a time**: No multi-symbol or portfolio-level paper book.
+- **Fill model**: Fill at bar close only; no intra-bar or partial fills.
+- **Data**: No data loading; caller supplies ordered bar-like iterable. No direct nq_data integration.
+- **No broker or live**: Paper only; no nq_exec coupling.
 
-## Why Paper Trading Before Live Trading
+## Assumptions
 
-Paper trading validates behavior and performance with real-time (or replay) data and simulated execution, without capital at risk. It exposes operational issues, slippage assumptions, and edge decay before going live. Requiring a successful paper phase and weekly audit reduces the risk of deploying fragile or untested strategies.
+- Bars are in chronological order and bar-like (at least `ts`, `close`; optional symbol, etc.).
+- Strategy is callable(bar) or has `on_bar(bar)` returning LONG/SHORT/EXIT/HOLD.
+- Same deterministic slippage/commission rules as backtest (auditable).
 
-## Why Paper Trading Is Weekly Audited
+## Relationship: Walk-Forward, Paper, Live Promotion
 
-Paper sessions are reviewed weekly (see docs/14_WEEKLY_AUDIT_STANDARD.md). The audit covers entries, exits, TP/SL, RR, slippage, winning/losing setups, and edge decay. Findings drive adjustments, strategy pauses, or new hypotheses. No strategy moves to live on intuition alone; promotion requires documented audit and re-validation.
+- **Walk-forward** validates temporal robustness on historical train/test windows.
+- **Paper trading** validates behavior on replay or live-like data with simulated execution; results are weekly-audited (see Weekly Audit Standard).
+- **Live** is only after backtest, walk-forward, paper, and explicit approval; nq_exec handles real orders.
 
-## Why a Skeleton
+Paper sessions feed weekly audit and promotion decisions; no strategy moves to live without documented paper phase and audit.
 
-- **Clean foundation**: Fixed public API (`PaperEngine`, `PaperTrade`, `PaperPosition`, `PaperAccountState`, `PaperSessionResult`) and ledger/reporter hooks so that real signal processing, fills, and persistence can be added in later iterations.
-- **No broker logic**: No real orders, no external APIs, no nq_exec coupling. Full implementation will integrate with data feed and risk in a future iteration.
+## Future Versions
+
+- Optional persistence of session results and trades for audit trail.
+- Integration with nq_risk and nq_guardrails for pre-trade checks in paper.
+- Multi-position or multi-symbol paper book if needed.
