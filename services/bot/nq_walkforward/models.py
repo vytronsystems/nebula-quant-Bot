@@ -1,5 +1,7 @@
 # NEBULA-QUANT v1 | nq_walkforward models
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Any
 
