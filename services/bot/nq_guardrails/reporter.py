@@ -1,4 +1,6 @@
-# NEBULA-QUANT v1 | nq_guardrails reporter
+# NEBULA-QUANT v1 | nq_guardrails reporter — summary for monitoring and logs
+
+from __future__ import annotations
 
 from typing import Any
 
@@ -8,12 +10,13 @@ from nq_guardrails.models import GuardrailResult
 def build_guardrail_report(result: GuardrailResult) -> dict[str, Any]:
     """
     Build a dictionary report for monitoring and logs.
-    Skeleton: no external APIs or persistence.
+    issue_count = number of signals with severity WARN or BLOCK.
     """
+    issue_count = sum(1 for s in result.signals if s.severity in ("WARN", "BLOCK"))
     return {
         "allowed": result.allowed,
         "reason": result.reason,
-        "signal_count": len(result.signals),
+        "issue_count": issue_count,
         "signals": [
             {
                 "signal_type": s.signal_type,

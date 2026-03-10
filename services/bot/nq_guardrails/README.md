@@ -1,32 +1,40 @@
-# nq_guardrails
-
-**NEBULA-QUANT v1** — Risk protection layer (skeleton).
+# nq_guardrails — Safety and Kill-Switch Layer (Real Engine)
 
 ## Purpose
 
-`nq_guardrails` is a **system-level safety controller** responsible for preventing catastrophic losses and unsafe trading conditions. It does **not** execute trades; it only evaluates risk conditions and returns safety signals (allowed / blocked, plus reasons and metadata).
+`nq_guardrails` is a **system-level safety controller** that evaluates account, market, strategy, and execution conditions and returns **allowed / blocked** decisions. It does **not** execute trades; it only produces deterministic safety signals. Fail-closed: any **BLOCK** severity signal forces `allowed=False`.
 
-## Examples of risk protections
+## What Is Implemented
 
-Typical guardrails (placeholders in this skeleton):
+- **Account-state checks**: `check_max_drawdown(account, context)` — BLOCK if drawdown ≥ limit; `check_daily_loss(account, context)` — BLOCK if daily loss (as fraction of equity) ≥ limit. Missing fields are tolerated (no crash).
+- **Market-condition checks**: `check_volatility_spike(market, context)` — WARN if volatility ≥ threshold, BLOCK if ≥ extreme threshold.
+- **Strategy-health checks**: `check_strategy_disable(strategy_health, context)` — BLOCK if `strategy_enabled` is False.
+- **Execution-state checks**: `check_execution_pause(execution_state, context)` — BLOCK if `execution_enabled` is False.
+- **Severity convention**: INFO, WARN, BLOCK. Any BLOCK → trading not allowed.
+- **Engine**: `GuardrailsEngine.run_guardrails(account, positions, volatility, strategy_health, execution_state, context)` runs all domains, merges signals, applies fail-closed, updates `GuardrailsState` (trading_enabled, last_shutdown_reason, active_signals, updated_ts), returns `GuardrailResult`.
+- **State**: `GuardrailsState` holds trading_enabled, last_shutdown_reason, active_signals, updated_ts; in-memory only, no persistence.
+- **Reporter**: `build_guardrail_report(result)` returns dict with allowed, reason, issue_count (WARN+BLOCK), signals (signal_type, severity, message, timestamp), metadata.
 
-- **Max drawdown stop** — Halt trading when account drawdown exceeds a limit.
-- **Daily loss limit** — Stop new risk when daily PnL loss exceeds a threshold.
-- **Volatility shutdown** — Pause or reduce exposure when volatility spikes (e.g. VIX or realized vol).
-- **Strategy disable** — Disable specific strategies based on health or performance.
-- **Execution pause** — Pause order submission when execution layer or market is abnormal.
-- **Abnormal market conditions** — Detect and react to circuit breakers, illiquidity, or bad data.
+## Current Limitations
 
-## Integration with the trading pipeline
+- **No persistence**: State is in-memory only; no DB or file.
+- **Input shape**: Expects dict-like inputs (e.g. account with drawdown, daily_pnl, equity; market with volatility; strategy_health with strategy_enabled; execution_state with execution_enabled). Missing keys are safe (no violation).
+- **No broker or live**: Pure evaluation; no exchange or execution connectivity.
+- **Thresholds**: Config defaults (MAX_DRAWDOWN_LIMIT, DAILY_LOSS_LIMIT, VOLATILITY_THRESHOLD, EXTREME_VOLATILITY_THRESHOLD, MAX_OPEN_POSITIONS); context can override per call.
 
-The main pipeline remains:
+## Assumptions
 
-`nq_data → nq_strategy → nq_risk → nq_backtest → nq_walkforward → nq_paper → nq_exec`
+- Caller supplies account, market, strategy_health, execution_state (or empty dicts). Engine is tolerant of missing fields.
+- Fail-closed: when in doubt, block. Any BLOCK signal implies allowed=False.
 
-Guardrails sit **alongside** this pipeline as infrastructure:
+## Relationship: Paper, Guardrails, Execution Safety
 
-- The orchestrator or main loop can call `GuardrailsEngine.run_guardrails()` before allowing new trades or after each decision cycle.
-- If `GuardrailResult.allowed` is `False`, the system should not open new positions or may pause execution.
-- Reports from `reporter.build_guardrail_report()` can be sent to monitoring and logs.
+- **Paper trading** runs strategies with simulated fills; guardrails can be evaluated before or during paper sessions to simulate real-world kill-switches.
+- **Guardrails** sit alongside the pipeline: the orchestrator or main loop should call `run_guardrails()` before allowing new trades or after each cycle. If `allowed` is False, the system should not open new positions and may pause execution.
+- **Live execution** (nq_exec) should respect guardrail results; no live orders when guardrails block.
 
-This module is skeleton-only: no external APIs, no broker connectivity, no database persistence. All rule functions return safe placeholder results until wired to real account, market, and execution feeds.
+## Future Versions
+
+- Optional persistence of guardrail decisions and state for audit.
+- Tighter integration with nq_risk and nq_paper (e.g. account state from paper session).
+- Additional rules (e.g. max open positions, liquidity, data quality).

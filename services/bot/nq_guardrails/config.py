@@ -1,17 +1,14 @@
-# NEBULA-QUANT v1 | nq_guardrails config (placeholder limits)
+# NEBULA-QUANT v1 | nq_guardrails config — safe defaults, engine honors runtime overrides
 
-# Placeholder: max drawdown (fraction) before shutdown.
-# Not enforced until integration with PnL/account feed.
-MAX_DRAWDOWN_LIMIT: float = 0.10  # 10%
+# Max drawdown (fraction of equity/peak) before BLOCK. 0.10 = 10%.
+MAX_DRAWDOWN_LIMIT: float = 0.10
 
-# Placeholder: max daily loss (fraction) before halt.
-# Not enforced until integration with daily PnL.
-DAILY_LOSS_LIMIT: float = 0.05  # 5%
+# Max daily loss (fraction or absolute; interpretation by rule) before BLOCK. 0.05 = 5%.
+DAILY_LOSS_LIMIT: float = 0.05
 
-# Placeholder: volatility threshold for shutdown (e.g. VIX or realized vol).
-# Not enforced until integration with volatility feed.
-VOLATILITY_THRESHOLD: float = 50.0  # arbitrary units
+# Volatility threshold: above this → WARN; above EXTREME → BLOCK.
+VOLATILITY_THRESHOLD: float = 50.0
+EXTREME_VOLATILITY_THRESHOLD: float = 100.0
 
-# Placeholder: max open positions before blocking new trades.
-# Not enforced until integration with position tracking.
+# Max open positions before blocking new trades.
 MAX_OPEN_POSITIONS: int = 20

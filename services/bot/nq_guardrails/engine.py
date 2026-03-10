@@ -1,15 +1,18 @@
-# NEBULA-QUANT v1 | nq_guardrails engine
+# NEBULA-QUANT v1 | nq_guardrails engine — real evaluation, fail-closed aggregation
+
+from __future__ import annotations
 
 import time
 from typing import Any
 
 from nq_guardrails.models import GuardrailResult, GuardrailSignal
 from nq_guardrails.rules import (
-    check_max_drawdown,
+    SEVERITY_BLOCK,
     check_daily_loss,
-    check_volatility_spike,
-    check_strategy_disable,
     check_execution_pause,
+    check_max_drawdown,
+    check_strategy_disable,
+    check_volatility_spike,
 )
 from nq_guardrails.state import GuardrailsState
 
@@ -84,20 +87,21 @@ class GuardrailsEngine:
         out = self._merge_results(results)
         self._state.updated_ts = time.time()
         self._state.trading_enabled = out.allowed
-        if not out.allowed:
-            self._state.last_shutdown_reason = out.reason
+        self._state.last_shutdown_reason = out.reason if not out.allowed else ""
         return out
 
     def _merge_results(self, results: list[GuardrailResult]) -> GuardrailResult:
-        """Merge multiple GuardrailResults into one; allowed=False if any blocks."""
+        """Merge multiple GuardrailResults; fail-closed: any BLOCK signal → allowed=False."""
         all_signals: list[GuardrailSignal] = []
-        allowed = True
-        reason = "ok"
         for r in results:
             all_signals.extend(r.signals)
-            if not r.allowed:
-                allowed = False
-                reason = r.reason
+        block_signals = [s for s in all_signals if s.severity == SEVERITY_BLOCK]
+        allowed = len(block_signals) == 0
+        reason = block_signals[0].message if block_signals else "ok"
+        self._state.active_signals = [
+            {"signal_type": s.signal_type, "severity": s.severity, "message": s.message, "timestamp": s.timestamp}
+            for s in all_signals
+        ]
         return GuardrailResult(
             allowed=allowed,
             signals=all_signals,

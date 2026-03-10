@@ -1,4 +1,6 @@
-# NEBULA-QUANT v1 | nq_guardrails state (runtime placeholders, no persistence)
+# NEBULA-QUANT v1 | nq_guardrails state — in-memory runtime state, no persistence
+
+from __future__ import annotations
 
 from dataclasses import dataclass, field
 from typing import Any
@@ -6,7 +8,7 @@ from typing import Any
 
 @dataclass
 class GuardrailsState:
-    """Runtime state for guardrails (skeleton). No persistence."""
+    """Runtime state for guardrails; updated by engine after each run_guardrails()."""
 
     trading_enabled: bool = True
     last_shutdown_reason: str = ""
