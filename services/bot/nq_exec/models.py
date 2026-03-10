@@ -1,12 +1,14 @@
 # NEBULA-QUANT v1 | nq_exec models
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from typing import Any
 
 
 @dataclass
 class ExecutionOrder:
-    """Order submitted to execution layer (skeleton)."""
+    """Order submitted to execution layer."""
 
     order_id: str
     symbol: str
@@ -21,7 +23,7 @@ class ExecutionOrder:
 
 @dataclass
 class ExecutionFill:
-    """Single fill event (skeleton)."""
+    """Single fill event."""
 
     fill_id: str
     order_id: str
@@ -34,7 +36,7 @@ class ExecutionFill:
 
 @dataclass
 class ExecutionResult:
-    """Result of an execution operation (skeleton)."""
+    """Result of an execution operation."""
 
     order: ExecutionOrder
     fills: list[ExecutionFill]

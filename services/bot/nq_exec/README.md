@@ -1,26 +1,41 @@
-# nq_exec — Execution Layer (Skeleton)
+# nq_exec — Execution Layer (Real Engine)
 
 ## Purpose
 
-`nq_exec` provides the architectural foundation for order routing, execution events, fills, and broker adapters in NEBULA-QUANT. It is **execution infrastructure only** in skeleton form: no real broker connectivity, no live execution, no external API calls.
+`nq_exec` is the execution abstraction layer for NEBULA-QUANT: order validation, routing through adapters, and deterministic execution results. It is **simulated/in-memory by default**: no real broker authentication, no live order placement, no external API or exchange connectivity. Real broker integration can be added later behind the same adapter interface.
 
-## Role in the Pipeline
+## What Is Implemented
 
-```
-nq_data → nq_strategy → nq_risk → nq_backtest → nq_walkforward → nq_paper → nq_exec
-```
+- **Order validation**: Orders must have order_id, symbol, side, qty > 0; missing or invalid fields yield a rejected result and no fill.
+- **ExecutionEngine**: `submit_order(order)` validates, then routes via adapter when execution is enabled and adapter is available; `cancel_order(order_id)` and `get_order_status(order_id)` delegate to adapter. Fail-closed: when execution is disabled or adapter is unavailable, all submits are rejected and no placeholder fill is created.
+- **Adapters**: `ExecutionAdapterProtocol` (submit, cancel, status, health_check). `TradeStationAdapter` and `BinanceAdapter` implement the protocol with in-memory state: store orders by order_id, simulate accept (with placeholder fill), cancel (mark cancelled), status (lookup). Adapters can be marked unavailable; then submit/cancel/status return rejected or not_found.
+- **Router**: `route_order(order, adapter)` checks adapter presence and `health_check()`; if missing or unavailable returns rejected result; otherwise returns `adapter.submit(order)`.
+- **Fills**: `build_placeholder_fill(order=..., fill_price_mode="limit")` creates a deterministic placeholder fill from an order; `build_fill_summary(fills)` returns total_fills, total_qty, avg_price. No persistence.
+- **Config**: DEFAULT_EXECUTION_MODE ("simulated"), DEFAULT_ORDER_TYPE ("market"), DEFAULT_BROKER ("none"), DEFAULT_EXECUTION_ENABLED (False), DEFAULT_SIMULATED_FILL_PRICE_MODE ("limit").
 
-nq_exec sits at the end of the pipeline. Strategies that pass research, backtest, walk-forward, and paper (with weekly audit) may eventually be routed through nq_exec for live execution—only after explicit approval and risk controls. This module defines the interfaces (ExecutionEngine, adapters, order/fill/result models) so that real broker integration can be added in a later iteration without breaking callers.
+## Current Limitations
 
-## Why Skeleton-Only
+- **No live trading**: All execution is in-memory and simulated. No real broker auth, no HTTP/WebSocket, no exchange connectivity.
+- **No persistence**: Orders and fills exist only in adapter in-memory state.
+- **Placeholder fills only**: Fill price from order limit_price (or caller); no real market data or tick feed.
 
-- **Clean foundation**: Fixed public API (`ExecutionEngine`, `ExecutionOrder`, `ExecutionFill`, `ExecutionResult`) and adapter protocol so that TradeStation/Binance (or other venues) can be wired in later.
-- **No live risk**: Real execution is not enabled until the full promotion path (research → backtest → walk-forward → paper → audit) is satisfied and governance approves.
+## Assumptions
 
-## Why Real Execution Is Not Enabled Yet
+- Callers supply fully formed `ExecutionOrder` objects (order_id, symbol, side, qty, order_type, limit_price, status, created_ts). Engine normalizes created_ts when missing.
+- Fail-closed: when execution is disabled or adapter is unavailable, the engine must not simulate a fill; it returns rejected.
 
-Live trading requires validated strategies, operational runbooks, and risk limits. The skeleton exists so that the execution layer is architecturally in place; real broker connectivity and order placement will be added in a controlled iteration after paper and audit confirm edge and operations are ready.
+## How This Differs From Real Broker Connectivity
+
+- **This layer**: Validates and normalizes orders, routes to an adapter interface, produces deterministic results and placeholder fills. Adapters are in-memory stubs that simulate accept/cancel/status.
+- **Future real connectivity**: Same engine and router; swap in adapters that perform real auth, HTTP/WebSocket calls, and exchange order placement. Engine behavior (validation, fail-closed, result shape) stays the same.
 
 ## Relationship to Paper Trading
 
-Paper trading (nq_paper) simulates fills and positions without sending orders to a broker. nq_exec is the layer that would send real orders when enabled. Paper and execution share the same pipeline position conceptually (paper = simulated execution, nq_exec = real execution); both consume signals and risk decisions from upstream modules.
+- **nq_paper**: Simulates positions and fills over bar data without sending orders anywhere.
+- **nq_exec**: Abstraction for “send order → get result/fill.” In current form it only simulates; when real adapters are added, nq_exec is the single place where live orders are sent, subject to guardrails and risk.
+
+## Future Versions
+
+- Real TradeStation/Binance adapters (auth, API, order placement) behind the same protocol.
+- Optional persistence of orders and fills for audit.
+- Integration with nq_guardrails (e.g. no submit when guardrails block).
