@@ -1,8 +1,16 @@
 # NEBULA-QUANT v1 | nq_metrics engine
 
+from __future__ import annotations
+
 from typing import Any
 
-from nq_metrics.models import MetricsResult, TradePerformance
+from nq_metrics.models import (
+    MetricsResult,
+    ObservabilityInput,
+    SystemObservabilityReport,
+    TradePerformance,
+)
+from nq_metrics.observability import generate_observability_report
 from nq_metrics.calculations import (
     calculate_win_rate,
     calculate_profit_factor,
@@ -120,3 +128,14 @@ class MetricsEngine:
             equity_curve=curve,
             metadata={"skeleton": True},
         )
+
+    def generate_observability_report(
+        self,
+        inp: ObservabilityInput | None,
+        generated_key: str = "",
+    ) -> SystemObservabilityReport:
+        """
+        Generate deterministic system observability report from supplied inputs.
+        Side-effect free; does not execute trades or change decisions.
+        """
+        return generate_observability_report(inp, generated_key)
