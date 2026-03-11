@@ -1,35 +1,60 @@
 # NEBULA-QUANT v1 | Project State
 
-## Fase actual
-**Fase 2** — Trading Core institucional.
+## High-level system description
+NEBULA-QUANT v1 is an institutional quantitative trading research & execution platform. The core of the system lives under `services/bot/` as a deterministic, fail-closed pipeline of modules with strict boundaries and no hidden side effects.
 
-## Paso actual
-**Paso 5.5** — Cierre de chat y congelación de arquitectura (documentación institucional, sin implementar nq_risk en esta iteración).
+## Current pipeline (architectural truth)
 
-## Commits recientes relevantes
-- `15f9d57` feat: add nq_strategy skeleton (strategy engine + rules)
-- `97c270b` feat: add nq_data skeleton (data ingestion module)
-- `d25b2b6` chore: standardize DB access with single PG_DSN source
-- `1bf87a9` fix: remove dead code and recursion bug in nq-run.sh
-- `4d48719` docs(research): add quantitative research and backtesting framework
-- `24f86db` docs(cursor): add master prompt and governance agents
-- `9d93d83` docs(factory): add software factory operating framework
-- `bd3d96d` chore: baseline validated phase 1 infrastructure and persistence
+nq_data  
+→ nq_data_quality  
+→ nq_strategy  
+→ nq_risk  
+→ nq_backtest  
+→ nq_walkforward  
+→ nq_paper  
+→ nq_guardrails  
+→ nq_exec  
+→ nq_metrics  
+→ nq_experiments  
+→ nq_portfolio  
+→ nq_promotion
 
-## Módulos implementados
-- **nq_data** — skeleton: Bar, DataProviderProtocol, TradeStation stub, feed (get_bars, get_latest), normalización, timeframes 1m/5m/15m/1h/1d.
-- **nq_strategy** — skeleton: StrategyEngine, Strategy, Signal (LONG/SHORT/EXIT/HOLD), rules (momentum, breakout, trend), ExampleStrategy.
-- **Infraestructura Fase 1** — Docker Compose, Bot, Postgres, Redis, Grafana, Prometheus, Alertmanager, /metrics, nq-verify.sh, tablas y migraciones validadas.
+This order is fixed from an architectural point of view and must not be changed without explicit Architecture Gate approval.
 
-## Módulos pendientes
-- **nq_risk** — no implementado (directorio vacío; próxima iteración).
-- **nq_backtest**, **nq_walkforward**, **nq_paper**, **nq_exec** — pendientes.
-- **nq_audit**, **nq_research**, **nq_portfolio**, **nq_guardrails** y resto del catálogo — pendientes según prioridad.
+## Implemented modules (Phase 13–19)
 
-## Próxima iteración aprobada
-Implementar **nq_risk** (Risk Engine) en un chat nuevo, sin tocar nq_data ni nq_strategy. Seguir orden: Orchestrator → Architecture Gate → Builder → QA Gate → Git.
+### Core engines (deterministic behavior)
+- **nq_backtest** — Bar-by-bar backtest engine with commissions/slippage, equity curve and metrics (win rate, PnL, drawdown, Sharpe-like).
+- **nq_walkforward** — Train/test window engine orchestrating multiple backtests with pass/fail rules.
+- **nq_paper** — Paper trading sessions, positions and trades in-memory; used for pre-live validation.
+- **nq_guardrails** — System safety controller; evaluates drawdown, daily loss, volatility spikes and strategy disable rules; returns `GuardrailResult` and fails closed.
+- **nq_exec** — Execution abstraction; validates orders, routes via in-memory adapters, and returns `ExecutionResult`; no direct broker integration in v1.
+- **nq_risk** — Deterministic risk decision engine; evaluates `RiskOrderIntent` + `RiskContext` + `RiskLimits` and returns ALLOW / REDUCE / BLOCK with explicit risk metrics.
+- **nq_portfolio** — Portfolio governance engine; final portfolio approval gate before `nq_exec` (ALLOW / THROTTLE / BLOCK) with capital usage and drawdown limits.
+- **nq_metrics** — Performance and observability layer; computes trading metrics and produces `SystemObservabilityReport` from observability inputs.
+- **nq_promotion** — Lifecycle governance engine; validates promotions idea → research → backtest → walkforward → paper → live → retired, strictly fail-closed.
 
-## Riesgos actuales
-- nq_risk aún no existe; el flujo nq_data → nq_strategy → nq_risk → … queda bloqueado hasta su implementación.
-- No llamadas reales a APIs externas en nq_data hasta iteración aprobada.
-- Secretos y política de exclusión (apikey_cursor.txt, .env) deben mantenerse fuera del repo.
+### Integration and registry
+- **nq_strategy_registry** — Source of truth for strategy registration and lifecycle state; provides `get_registration_record()` and registry summaries.
+- **nq_obs** — Observability integration layer; gathers outputs from registry, exec, guardrails, portfolio, promotion and experiments and normalizes them into `ObservabilityInput` for `nq_metrics`.
+
+### Skeleton / research modules
+- **nq_data** — Skeleton data ingestion & normalization (providers, canonical `Bar` model).
+- **nq_data_quality** — Skeleton data quality checks.
+- **nq_strategy** — Skeleton strategy engine and signal generation.
+- **nq_experiments** — Skeleton experiment registry and comparison.
+
+## Modules still skeleton or pending
+- **Skeleton**: `nq_data`, `nq_data_quality`, `nq_strategy`, `nq_experiments`.
+- **Planned / pending**: research and audit modules from the catalog (e.g. `nq_research`, `nq_montecarlo`, `nq_audit`, `nq_lab`, `nq_edge_decay`, etc.).
+
+## System maturity overview
+- **Decision & execution core**: nq_risk, nq_guardrails, nq_exec, nq_portfolio and nq_promotion provide a multi-layer, fail-closed decision pipeline.
+- **Validation core**: nq_backtest, nq_walkforward and nq_paper provide deterministic research and pre-live validation.
+- **Observability**: nq_metrics + nq_obs provide system, strategy and control-layer observability without side effects.
+- **Registry & lifecycle**: nq_strategy_registry + nq_promotion centralize lifecycle truth and promotion rules.
+
+## Open items
+- End-to-end orchestrator to run the full pipeline deterministically from data → strategy → risk → backtest/walkforward/paper → guardrails → exec → metrics/obs.
+- Optional persistence/export of observability reports and audit artefacts for external weekly audit tooling.
+- Progressive deepening of skeleton modules (data ingestion, strategy framework, experiment lab) and planned research/audit modules.

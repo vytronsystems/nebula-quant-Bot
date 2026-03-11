@@ -1,44 +1,41 @@
 # NEBULA-QUANT v1 | Module Map
 
-## Lista de módulos y estado
+## Modules and status (Phase 19)
 
-| Módulo | Estado | Notas |
-|--------|--------|--------|
-| nq_data | **skeleton** | Bar, providers (base + TradeStation stub), feed, normalize, config, timeframes |
-| nq_strategy | **skeleton** | Engine, Strategy, Signal, rules, ExampleStrategy |
-| nq_risk | **pending** | Directorio vacío; próxima iteración |
-| nq_backtest | pending | — |
-| nq_walkforward | pending | — |
-| nq_paper | pending | — |
-| nq_exec | pending | — |
-| nq_portfolio | pending | — |
-| nq_guardrails | pending | — |
-| nq_research | pending | — |
-| nq_montecarlo | pending | — |
-| nq_lab | pending | — |
-| nq_strategy_registry | pending | — |
-| nq_alpha_discovery | pending | — |
-| nq_regime | pending | — |
-| nq_edge_decay | pending | — |
-| nq_audit | pending | — |
-| nq_trade_review | pending | — |
-| nq_learning | pending | — |
-| nq_improvement | pending | — |
-| nq_reporting | pending | — |
-| nq_decision_archive | pending | — |
-| nq_obs / nq_metrics / nq_alerting / nq_sre / nq_runbooks / nq_scheduler | pending / parcial | Observabilidad Fase 1 operativa (Grafana, Prometheus, Alertmanager) |
-| nq_db / nq_cache / nq_event_store / nq_config | pending / parcial | Persistencia vía PG_DSN y tablas actuales |
+| Module               | Status           | Notes |
+|----------------------|------------------|-------|
+| `nq_data`            | skeleton         | Canonical data feed (`Bar`) and provider abstraction. |
+| `nq_data_quality`    | skeleton         | Data validation. |
+| `nq_strategy`        | skeleton         | Strategy engine & signals. |
+| `nq_strategy_registry` | implemented    | Strategy registry & lifecycle truth. |
+| `nq_risk`            | implemented      | Risk decision engine (ALLOW/REDUCE/BLOCK). |
+| `nq_backtest`        | implemented      | Backtest engine. |
+| `nq_walkforward`     | implemented      | Walk-forward validation. |
+| `nq_paper`           | implemented      | Paper trading sessions. |
+| `nq_guardrails`      | implemented      | Safety and guardrail engine. |
+| `nq_exec`            | implemented      | Execution abstraction. |
+| `nq_metrics`         | implemented      | Metrics & observability. |
+| `nq_experiments`     | skeleton         | Experiment registry. |
+| `nq_portfolio`       | implemented      | Portfolio governance & approval gate. |
+| `nq_promotion`       | implemented      | Lifecycle promotion engine. |
+| `nq_obs`             | integration layer| Observability integration into `nq_metrics`. |
 
-## Orden de construcción recomendado
-1. **nq_data** — hecho (skeleton).
-2. **nq_strategy** — hecho (skeleton).
-3. **nq_risk** — siguiente (límites, sizing, decisión).
-4. **nq_backtest** — motor reproducible.
-5. **nq_audit** — revisión y estándares.
-6. **nq_research** — workflow de investigación.
-7. nq_walkforward, nq_paper, nq_exec y resto según prioridad del Master Execution Plan.
+Other catalog modules (research, audit, factory, persistence) remain pending or partial as described in `MODULE_CATALOG.md`.
 
-## Convención de estados
-- **implemented** — Módulo funcional y usado en flujo actual.
-- **skeleton** — Estructura y API mínima lista; evolución en iteraciones.
-- **pending** — Aún no construido o solo planificado.
+## Build order (completed so far)
+
+1. `nq_data` / `nq_strategy` — skeletons.  
+2. `nq_backtest`, `nq_walkforward`, `nq_paper` — validation engines.  
+3. `nq_guardrails`, `nq_exec` — safety and execution.  
+4. `nq_portfolio` — portfolio governance gate.  
+5. `nq_promotion` + `nq_strategy_registry` — lifecycle governance and registry.  
+6. `nq_risk` — risk decision engine.  
+7. `nq_metrics` — observability & metrics.  
+8. `nq_obs` — observability integration layer.
+
+## Status conventions
+
+- **implemented** — Real deterministic logic in place.
+- **skeleton** — Structure & API in place; logic to be deepened.
+- **integration layer** — Adapter/gatherer between modules.
+- **pending/partial** — Planned or partially realized components.
