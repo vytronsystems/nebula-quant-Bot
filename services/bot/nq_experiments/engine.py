@@ -1,10 +1,14 @@
 # NEBULA-QUANT v1 | nq_experiments engine
 
+from __future__ import annotations
+
 import time
+from collections.abc import Callable
 from dataclasses import replace
 from typing import Any
 
-from nq_experiments.models import ExperimentRecord, ExperimentsRegistryResult
+from nq_experiments.analyzers import analyze_experiment_records, validate_experiment_record
+from nq_experiments.models import ExperimentRecord, ExperimentReport, ExperimentsRegistryResult
 from nq_experiments.storage import (
     add_experiment,
     update_experiment,
@@ -16,6 +20,7 @@ from nq_experiments.config import (
     DEFAULT_EXPERIMENT_STATUS,
     DEFAULT_EXPERIMENT_TYPE,
 )
+from nq_experiments.summaries import build_experiment_report, build_experiment_summary
 
 
 class ExperimentsEngine:
@@ -120,3 +125,58 @@ class ExperimentsEngine:
             failed_experiments=failed,
             metadata={"skeleton": True},
         )
+
+
+# --- Experiment analysis engine (Phase 33) ---
+
+
+class ExperimentEngine:
+    """
+    Deterministic experiment analysis engine. Validates records, runs analyzers,
+    builds summary and report. Injectable clock and counter-based or caller-supplied report_id.
+    """
+
+    def __init__(self, clock: Callable[[], float] | None = None) -> None:
+        self._clock = clock or time.time
+        self._report_counter = 0
+
+    def _now(self) -> float:
+        return self._clock()
+
+    def _next_report_id(self) -> str:
+        self._report_counter += 1
+        return f"experiment-report-{self._report_counter}"
+
+    def validate_experiment_record(self, record: Any) -> None:
+        """Validate a single record. Raises ExperimentError if invalid."""
+        validate_experiment_record(record)
+
+    def analyze_experiments(
+        self,
+        experiment_records: list[Any],
+        report_id: str | None = None,
+        generated_at: float | None = None,
+    ) -> ExperimentReport:
+        """
+        Analyze experiment records, produce findings and summary, return ExperimentReport.
+        Empty list returns valid empty report. Malformed critical input raises ExperimentError.
+        """
+        records = experiment_records if experiment_records is not None else []
+        now = generated_at if generated_at is not None else self._now()
+        if report_id is not None:
+            rid = report_id
+            self._report_counter += 1
+        else:
+            rid = self._next_report_id()
+        findings = analyze_experiment_records(records)
+        summary = build_experiment_summary(records, findings)
+        return build_experiment_report(rid, now, summary, findings, records, metadata={})
+
+    def build_report(
+        self,
+        experiment_records: list[Any],
+        report_id: str | None = None,
+        generated_at: float | None = None,
+    ) -> ExperimentReport:
+        """Alias for analyze_experiments for API consistency."""
+        return self.analyze_experiments(experiment_records, report_id=report_id, generated_at=generated_at)

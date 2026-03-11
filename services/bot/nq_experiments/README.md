@@ -1,22 +1,40 @@
 # nq_experiments
 
-**NEBULA-QUANT v1** — Experiment tracking and research comparison layer (skeleton).
+**NEBULA-QUANT v1** — Experiment tracking, research comparison, and deterministic experiment analysis.
 
 ## Purpose
 
-`nq_experiments` is the **experiment tracking and research comparison layer**. It records and compares research experiments: backtest runs, walk-forward runs, parameter sets, strategy versions, metrics snapshots, experiment notes, and status. It does **not** execute strategies, connect to brokers, or call external APIs; it only manages experiment definitions, in-memory results, and reporting.
+`nq_experiments` is the **experiment tracking and analysis layer**. It records and compares research experiments (backtest, walk-forward, paper, research), manages experiment definitions and in-memory results, and provides **deterministic experiment analysis** (validation, findings, summaries, reports). It does **not** execute strategies, connect to brokers, or call external APIs.
+
+## Experiment record model
+
+- **ExperimentRecord** (existing): experiment_id, strategy_id, strategy_version, experiment_type, status, parameters, metrics, notes, created_at, updated_at, owner, metadata.
+- **ExperimentStatus**: pending, running, success, failed, degraded, invalid. Status `completed` is normalized to `success` for analysis.
+- **ExperimentType**: backtest, walkforward, paper, research, other.
+
+## Experiment analysis (Phase 33)
+
+- **ExperimentEngine(clock)** — Deterministic analysis engine. `analyze_experiments(experiment_records, report_id=..., generated_at=...)` returns **ExperimentReport** (report_id, generated_at, summary, findings, experiment_records).
+- **Validation** — Missing experiment_id or invalid status/type/metrics raises **ExperimentError**. Optional fields handled safely.
+- **Findings** — Deterministic categories: experiment_failed, experiment_degraded, experiment_invalid, missing_metrics, weak_result, inconsistent_experiment_record. Severity: info, warning, critical.
+- **ExperimentSummary** — total_experiments, successful/failed/degraded/invalid counts, strategies_seen, categories_seen.
+- **Weak-result heuristics** — Negative PnL, low win rate (<0.3), negative expectancy produce weak_result findings when metrics are present. No fabrication of missing data.
 
 ## How it supports research and experiment tracking
 
-- **Register experiments:** Store experiment_id, strategy_id, version, type (e.g. backtest), status, parameters, metrics, notes.
-- **Update status/metrics:** Progress experiments from pending → running → completed/failed and attach metrics snapshots.
-- **Compare experiments:** `comparison.compare_experiments()` and `build_metric_deltas()` support baseline vs candidate comparison for research decisions.
-- **Registry view:** `build_registry_result()` exposes total, active, completed, failed counts for dashboards and governance.
+- **Register experiments:** ExperimentsEngine.register_experiment(), update status/metrics, list/filter.
+- **Compare experiments:** `comparison.compare_experiments()` and `build_metric_deltas()` for baseline vs candidate.
+- **Registry view:** `build_registry_result()` for total, active, completed, failed counts.
+- **Analysis view:** `ExperimentEngine.analyze_experiments()` for findings and summary suitable for nq_audit, nq_learning, nq_reporting.
 
-## How it fits the institutional validation lifecycle
+## Deterministic guarantees
 
-Experiments align with the pipeline (research → backtest → walk-forward → paper → live). This module records each run (backtest, walk-forward, etc.) so that parameter sets, strategy versions, and metrics can be compared and audited before promoting a strategy. It does not run the pipeline; it tracks the outcomes.
+- Same experiment records produce the same report structure and finding set.
+- Report ids: counter-based `experiment-report-{n}` or caller-supplied. Finding ids: deterministic per record and index.
 
-## Why this skeleton exists before persistent experiment storage
+## Future integration
 
-The API and in-memory storage provide a stable interface for the rest of the platform. Database persistence and historical querying can be added in a later iteration without changing the public API (ExperimentsEngine, ExperimentRecord, comparison, reporter).
+- **nq_metrics / nq_obs:** Consume experiment summaries and metrics.
+- **nq_audit / nq_learning / nq_reporting:** Consume ExperimentReport (findings, summary) for audit trails, learning inputs, and system reports.
+
+No deep wiring in this phase; the API is ready for integration.

@@ -1,16 +1,31 @@
-# NEBULA-QUANT v1 | nq_experiments — experiment tracking and research comparison (skeleton)
-# No execution, no broker, no APIs, no DB. Manages experiment definitions and in-memory results only.
+# NEBULA-QUANT v1 | nq_experiments — experiment tracking and analysis
+# No execution, no broker, no APIs. Manages experiment definitions, in-memory results, and deterministic analysis.
 
+from nq_experiments.engine import ExperimentEngine, ExperimentsEngine
 from nq_experiments.models import (
-    ExperimentRecord,
     ExperimentComparisonResult,
+    ExperimentError,
+    ExperimentFinding,
+    ExperimentFindingSeverity,
+    ExperimentRecord,
+    ExperimentReport,
+    ExperimentStatus,
+    ExperimentSummary,
+    ExperimentType,
     ExperimentsRegistryResult,
 )
-from nq_experiments.engine import ExperimentsEngine
 
 __all__ = [
-    "ExperimentRecord",
     "ExperimentComparisonResult",
-    "ExperimentsRegistryResult",
+    "ExperimentEngine",
+    "ExperimentError",
+    "ExperimentFinding",
+    "ExperimentFindingSeverity",
+    "ExperimentRecord",
+    "ExperimentReport",
+    "ExperimentStatus",
+    "ExperimentSummary",
+    "ExperimentType",
     "ExperimentsEngine",
+    "ExperimentsRegistryResult",
 ]
