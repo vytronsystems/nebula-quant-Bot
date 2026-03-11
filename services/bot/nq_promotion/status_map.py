@@ -2,6 +2,14 @@
 
 from __future__ import annotations
 
+# Official lifecycle states (single source of truth for "known" state).
+OFFICIAL_LIFECYCLE_STATES: frozenset[str] = frozenset({
+    "idea", "research", "backtest", "walkforward", "paper", "live", "disabled", "retired", "rejected",
+})
+
+# Execution-compatible states only (paper, live).
+EXECUTION_COMPATIBLE_STATES: frozenset[str] = frozenset({"paper", "live"})
+
 # Allowed (from_status -> to_status). All other transitions are blocked by default.
 ALLOWED_TRANSITIONS: set[tuple[str, str]] = {
     ("idea", "research"),

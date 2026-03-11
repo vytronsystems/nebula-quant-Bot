@@ -5,7 +5,17 @@ from __future__ import annotations
 import time
 from typing import Any
 
-from nq_promotion.models import PromotionDecision, PromotionInput, PromotionResult
+from nq_promotion.integration import (
+    check_execution_eligibility as _check_execution_eligibility,
+    validate_transition_with_registry as _validate_transition_with_registry,
+)
+from nq_promotion.models import (
+    ExecutionEligibilityResult,
+    PromotionDecision,
+    PromotionInput,
+    PromotionResult,
+    PromotionTransitionDecision,
+)
 from nq_promotion.rules import (
     check_backtest_requirements,
     check_guardrail_requirements,
@@ -124,3 +134,26 @@ class PromotionEngine:
             evaluated_at=time.time(),
             metadata={"engine": "nq_promotion", "version": "1"},
         )
+
+    def evaluate_transition_with_registry(
+        self,
+        registry_engine: Any,
+        strategy_id: str,
+        target_state: str,
+    ) -> PromotionTransitionDecision:
+        """
+        Validate a lifecycle transition using registry as source of truth for current state.
+        nq_promotion is the authorized transition engine; does not own registry persistence.
+        """
+        return _validate_transition_with_registry(registry_engine, strategy_id or "", target_state or "")
+
+    def get_execution_eligibility(
+        self,
+        registry_engine: Any,
+        strategy_id: str,
+    ) -> ExecutionEligibilityResult:
+        """
+        Determine if strategy is executable (registered and lifecycle in {paper, live}).
+        Lifecycle state is resolved from registry only.
+        """
+        return _check_execution_eligibility(registry_engine, strategy_id or "")

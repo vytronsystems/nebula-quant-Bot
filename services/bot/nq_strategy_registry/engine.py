@@ -4,7 +4,12 @@ import time
 from dataclasses import replace
 from typing import Any
 
-from nq_strategy_registry.models import StrategyDefinition, StrategyRegistryResult
+from nq_strategy_registry.models import (
+    RegistryLookupResult,
+    StrategyDefinition,
+    StrategyRegistrationRecord,
+    StrategyRegistryResult,
+)
 from nq_strategy_registry.storage import (
     add_strategy,
     update_strategy,
@@ -17,7 +22,13 @@ from nq_strategy_registry.config import (
     DEFAULT_TIMEFRAME,
     DEFAULT_STATUS,
 )
-from nq_strategy_registry.status import STATUS_LIVE, STATUS_PAPER, STATUS_DISABLED, STATUS_RETIRED, STATUS_REJECTED
+from nq_strategy_registry.status import (
+    STATUS_LIVE,
+    STATUS_PAPER,
+    STATUS_DISABLED,
+    STATUS_RETIRED,
+    STATUS_REJECTED,
+)
 
 
 class StrategyRegistryEngine:
@@ -82,6 +93,52 @@ class StrategyRegistryEngine:
     def get_strategy(self, strategy_id: str) -> StrategyDefinition | None:
         """Return strategy by id or None."""
         return get_strategy_by_id(strategy_id or "")
+
+    def get_registration_record(self, strategy_id: str) -> RegistryLookupResult:
+        """
+        Strict lookup for lifecycle governance. Source of truth for registration and lifecycle state.
+        Fail-closed: missing id, not found, malformed record, or ambiguous → ok=False with reason_codes.
+        """
+        if not strategy_id or not str(strategy_id).strip():
+            return RegistryLookupResult(
+                ok=False,
+                record=None,
+                reason_codes=["missing_strategy_id"],
+                message="registry: strategy_id missing",
+            )
+        sid = str(strategy_id).strip()
+        definition = get_strategy_by_id(sid)
+        if definition is None:
+            return RegistryLookupResult(
+                ok=False,
+                record=None,
+                reason_codes=["strategy_not_found"],
+                message=f"registry: strategy {sid!r} not found",
+            )
+        status = getattr(definition, "status", None)
+        if not status or not isinstance(status, str) or not status.strip():
+            return RegistryLookupResult(
+                ok=False,
+                record=None,
+                reason_codes=["missing_lifecycle_state"],
+                message="registry: lifecycle state missing or malformed",
+            )
+        lifecycle_state = status.strip().lower()
+        disabled_states = {STATUS_DISABLED, STATUS_RETIRED, STATUS_REJECTED}
+        enabled = lifecycle_state not in disabled_states
+        record = StrategyRegistrationRecord(
+            strategy_id=definition.strategy_id,
+            version=getattr(definition, "version", "") or "",
+            lifecycle_state=lifecycle_state,
+            enabled=enabled,
+            metadata=getattr(definition, "metadata", None) or {},
+        )
+        return RegistryLookupResult(
+            ok=True,
+            record=record,
+            reason_codes=[],
+            message="ok",
+        )
 
     def list_strategies(
         self,

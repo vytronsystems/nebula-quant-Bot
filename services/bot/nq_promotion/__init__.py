@@ -2,11 +2,29 @@
 # Does not execute, backtest, or place orders. Evaluates promotion eligibility only.
 
 from nq_promotion.engine import PromotionEngine
-from nq_promotion.models import PromotionDecision, PromotionInput, PromotionResult
+from nq_promotion.integration import (
+    check_execution_eligibility,
+    resolve_lifecycle_from_registry,
+    validate_transition_with_registry,
+)
+from nq_promotion.models import (
+    ExecutionEligibilityResult,
+    PromotionDecision,
+    PromotionInput,
+    PromotionResult,
+    PromotionTransitionDecision,
+    PromotionTransitionRequest,
+)
 
 __all__ = [
+    "check_execution_eligibility",
+    "ExecutionEligibilityResult",
+    "PromotionDecision",
     "PromotionEngine",
     "PromotionInput",
-    "PromotionDecision",
     "PromotionResult",
+    "PromotionTransitionDecision",
+    "PromotionTransitionRequest",
+    "resolve_lifecycle_from_registry",
+    "validate_transition_with_registry",
 ]
