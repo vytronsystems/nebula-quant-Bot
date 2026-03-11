@@ -7,12 +7,16 @@ from typing import Any
 
 from nq_reporting.builders import (
     build_audit_summary,
+    build_experiment_summary,
+    build_improvement_summary,
     build_learning_summary,
     build_observability_summary,
     build_trade_review_summary,
 )
 from nq_reporting.models import (
     AuditSummaryReport,
+    ExperimentSummaryReport,
+    ImprovementSummaryReport,
     LearningSummaryReport,
     ObservabilitySummaryReport,
     ReportType,
@@ -45,13 +49,16 @@ class ReportEngine:
         audit_report: Any = None,
         trade_review_reports: Any = None,
         learning_report: Any = None,
+        improvement_plan: Any = None,
+        experiment_report: Any = None,
         observability_report: Any = None,
         report_id: str | None = None,
         generated_at: float | None = None,
     ) -> SystemReport:
         """
         Build SystemReport from optional subreports. Deterministic ordering:
-        audit, trade_review, learning, observability. Missing sections yield None.
+        audit, trade_review, learning, improvement, experiment, observability.
+        Missing sections yield None.
         """
         now = generated_at if generated_at is not None else self._now()
         if report_id is not None:
@@ -72,6 +79,14 @@ class ReportEngine:
         if learning_report is not None:
             learning_sum = build_learning_summary(learning_report)
 
+        improvement_sum: ImprovementSummaryReport | None = None
+        if improvement_plan is not None:
+            improvement_sum = build_improvement_summary(improvement_plan)
+
+        experiment_sum: ExperimentSummaryReport | None = None
+        if experiment_report is not None:
+            experiment_sum = build_experiment_summary(experiment_report)
+
         obs_sum: ObservabilitySummaryReport | None = build_observability_summary(observability_report)
         if (
             observability_report is None
@@ -89,6 +104,8 @@ class ReportEngine:
             audit_report=audit_sum,
             trade_review_report=trade_sum,
             learning_report=learning_sum,
+            improvement_report=improvement_sum,
+            experiment_report=experiment_sum,
             observability_report=obs_sum,
             metadata={"report_type": ReportType.SYSTEM.value},
         )

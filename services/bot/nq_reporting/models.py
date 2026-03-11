@@ -83,6 +83,32 @@ class ObservabilitySummaryReport:
 
 
 @dataclass(slots=True)
+class ImprovementSummaryReport:
+    """Summary report derived from nq_improvement ImprovementPlan."""
+
+    total_actions: int
+    priority_distribution: dict[str, int]
+    affected_strategies: list[str]
+    affected_modules: list[str]
+    categories_seen: list[str]
+    metadata: dict[str, Any] | None = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class ExperimentSummaryReport:
+    """Summary report derived from nq_experiments ExperimentReport."""
+
+    total_experiments: int
+    successful_experiments: int
+    failed_experiments: int
+    degraded_experiments: int
+    invalid_experiments: int
+    strategies_seen: list[str]
+    categories_seen: list[str]
+    metadata: dict[str, Any] | None = field(default_factory=dict)
+
+
+@dataclass(slots=True)
 class SystemReport:
     """Top-level system report aggregating all subreports."""
 
@@ -91,5 +117,7 @@ class SystemReport:
     audit_report: AuditSummaryReport | None = None
     trade_review_report: TradeReviewSummaryReport | None = None
     learning_report: LearningSummaryReport | None = None
+    improvement_report: ImprovementSummaryReport | None = None
+    experiment_report: ExperimentSummaryReport | None = None
     observability_report: ObservabilitySummaryReport | None = None
     metadata: dict[str, Any] | None = field(default_factory=dict)

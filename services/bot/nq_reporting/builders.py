@@ -7,6 +7,8 @@ from typing import Any
 
 from nq_reporting.models import (
     AuditSummaryReport,
+    ExperimentSummaryReport,
+    ImprovementSummaryReport,
     LearningSummaryReport,
     ObservabilitySummaryReport,
     ReportError,
@@ -143,6 +145,80 @@ def build_learning_summary(learning_report: Any) -> LearningSummaryReport:
         total_improvement_candidates=int(_get(summary, "total_improvement_candidates", 0) or 0),
         high_priority_items=int(_get(summary, "high_priority_count", 0) or 0),
         critical_priority_items=int(_get(summary, "critical_priority_count", 0) or 0),
+        categories_seen=sorted(_ensure_list(_get(summary, "categories_seen"), "categories_seen")),
+        metadata={},
+    )
+
+
+def build_improvement_summary(improvement_plan: Any) -> ImprovementSummaryReport:
+    """
+    Build ImprovementSummaryReport from an nq_improvement ImprovementPlan.
+    Does not mutate input. Returns empty summary if improvement_plan is None.
+    Fails closed if plan is non-None but missing summary.
+    """
+    if improvement_plan is None:
+        return ImprovementSummaryReport(
+            total_actions=0,
+            priority_distribution={"low": 0, "medium": 0, "high": 0, "critical": 0},
+            affected_strategies=[],
+            affected_modules=[],
+            categories_seen=[],
+            metadata={},
+        )
+    summary = _get(improvement_plan, "summary")
+    if summary is None:
+        raise ReportError("improvement_plan must have a summary")
+    total = int(_get(summary, "total_actions", 0) or 0)
+    low_c = int(_get(summary, "low_count", 0) or 0)
+    med_c = int(_get(summary, "medium_count", 0) or 0)
+    high_c = int(_get(summary, "high_count", 0) or 0)
+    crit_c = int(_get(summary, "critical_count", 0) or 0)
+    priority_distribution: dict[str, int] = {
+        "low": low_c,
+        "medium": med_c,
+        "high": high_c,
+        "critical": crit_c,
+    }
+    strategies = _ensure_list(_get(summary, "affected_strategies"), "affected_strategies")
+    modules = _ensure_list(_get(summary, "affected_modules"), "affected_modules")
+    categories = _ensure_list(_get(summary, "categories_seen"), "categories_seen")
+    return ImprovementSummaryReport(
+        total_actions=total,
+        priority_distribution=priority_distribution,
+        affected_strategies=sorted(str(s) for s in strategies if s is not None),
+        affected_modules=sorted(str(m) for m in modules if m is not None),
+        categories_seen=sorted(str(c) for c in categories if c is not None),
+        metadata={},
+    )
+
+
+def build_experiment_summary(experiment_report: Any) -> ExperimentSummaryReport:
+    """
+    Build ExperimentSummaryReport from an nq_experiments ExperimentReport.
+    Does not mutate input. Returns empty summary if experiment_report is None.
+    Fails closed if report is non-None but missing summary.
+    """
+    if experiment_report is None:
+        return ExperimentSummaryReport(
+            total_experiments=0,
+            successful_experiments=0,
+            failed_experiments=0,
+            degraded_experiments=0,
+            invalid_experiments=0,
+            strategies_seen=[],
+            categories_seen=[],
+            metadata={},
+        )
+    summary = _get(experiment_report, "summary")
+    if summary is None:
+        raise ReportError("experiment_report must have a summary")
+    return ExperimentSummaryReport(
+        total_experiments=int(_get(summary, "total_experiments", 0) or 0),
+        successful_experiments=int(_get(summary, "successful_experiments", 0) or 0),
+        failed_experiments=int(_get(summary, "failed_experiments", 0) or 0),
+        degraded_experiments=int(_get(summary, "degraded_experiments", 0) or 0),
+        invalid_experiments=int(_get(summary, "invalid_experiments", 0) or 0),
+        strategies_seen=sorted(_ensure_list(_get(summary, "strategies_seen"), "strategies_seen")),
         categories_seen=sorted(_ensure_list(_get(summary, "categories_seen"), "categories_seen")),
         metadata={},
     )
