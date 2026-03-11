@@ -9,6 +9,8 @@ from nq_risk.limits import (
     MAX_RISK_PER_TRADE,
     MAX_DAILY_DRAWDOWN,
     MAX_CONCURRENT_POSITIONS,
+    RiskModuleConfigLike,
+    risk_limits_from_config,
 )
 from nq_risk.models import (
     RiskContext,
@@ -24,6 +26,8 @@ from nq_risk.sizing import compute_size
 __all__ = [
     "DEFAULT_RISK_LIMITS",
     "RiskContext",
+    "RiskModuleConfigLike",
+    "risk_limits_from_config",
     "RiskDecision",
     "RiskDecisionResult",
     "RiskDecisionType",

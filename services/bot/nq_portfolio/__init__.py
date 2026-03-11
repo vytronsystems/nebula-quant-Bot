@@ -2,6 +2,7 @@ from __future__ import annotations
 
 # NEBULA-QUANT v1 | nq_portfolio — portfolio construction, exposure & approval gate
 
+from nq_portfolio.config import PortfolioModuleConfigLike, portfolio_limits_from_config
 from nq_portfolio.engine import PortfolioEngine
 from nq_portfolio.governance import PortfolioRiskEngine, evaluate_order_intent
 from nq_portfolio.models import (
@@ -20,6 +21,8 @@ from nq_portfolio.models import (
 __all__ = [
     "OrderIntent",
     "PortfolioAllocation",
+    "PortfolioModuleConfigLike",
+    "portfolio_limits_from_config",
     "PortfolioDecision",
     "PortfolioDecisionType",
     "PortfolioEngine",

@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from nq_event_store.config import DEFAULT_EVENT_STORE_CONFIG, EventStoreConfig
-from nq_event_store.engine import EventStoreEngine, EventStoreError
+from nq_event_store.engine import EventStoreEngine, EventStoreError, EventStorePathConfig, engine_from_config
 from nq_event_store.models import (
     EVENT_TYPE_EXECUTION,
     EVENT_TYPE_EXPERIMENT,
@@ -26,7 +26,9 @@ __all__ = [
     "EventStoreConfig",
     "EventStoreEngine",
     "EventStoreError",
+    "EventStorePathConfig",
     "EventStoreRepository",
+    "engine_from_config",
     "EventFilter",
     "EventRecord",
     "EVENT_TYPE_EXECUTION",

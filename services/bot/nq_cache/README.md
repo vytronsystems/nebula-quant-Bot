@@ -68,6 +68,7 @@ cache.clear(namespace=NAMESPACE_STRATEGY_REGISTRY)
 
 - **CachePolicy**: `default_ttl_seconds`, `max_entries`, `allow_none_values`, `namespace_defaults`.
 - **Clock**: pass `clock=your_callable` to `CacheEngine` for tests (e.g. a counter or list of monotonic values).
+- **nq_config integration**: `cache_engine_from_config(app_config.cache)` or `policy_from_config(app_config.cache)` with `AppConfig` from `nq_config`.
 
 ## Fail-closed behavior
 

@@ -5,7 +5,7 @@
 ## Design
 
 - **Engine**: `DatabaseEngine` wraps `sqlite3` and applies the base schema on initialization.
-- **Config**: `DatabaseConfig` and `DEFAULT_DB_CONFIG` define the database path (default: `nq_db.sqlite3` in the repo root, overridable via `NQ_DB_PATH`).
+- **Config**: `DatabaseConfig` and `DEFAULT_DB_CONFIG` define the database path (default: `nq_db.sqlite3` in the repo root, overridable via `NQ_DB_PATH`). For centralized config, use `engine_from_config(app_config.db)` with `AppConfig` from `nq_config`.
 - **Schema**: `schema.py` defines the initial tables for `strategies`, `executions`, `observability_snapshots`, `experiments` and `decisions`.
 - **Repositories**: `StrategyRepository`, `ExecutionRepository`, `ObservabilityRepository`, `ExperimentRepository`, `DecisionRepository` provide small, explicit CRUD-style methods.
 

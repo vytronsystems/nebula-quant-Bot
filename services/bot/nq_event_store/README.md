@@ -72,6 +72,7 @@ for ev in repo.fetch_all(limit=1000):
 
 - `NQ_EVENT_STORE_PATH`: SQLite path for the event store (defaults to same as `NQ_DB_PATH` when set).
 - `NQ_DB_PATH` / `NQ_DB_ROOT`: used as fallback for the DB path (see `config.py`).
+- **nq_config integration**: `engine_from_config(app_config.event_store)` builds the engine from `AppConfig` (requires `event_store.db_path` set; use shared DB or env).
 
 ## Fail-closed behavior
 

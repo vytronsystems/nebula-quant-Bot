@@ -8,11 +8,19 @@ from typing import Any
 
 from nq_cache.models import CacheEntry, CachePolicy, CacheResult, CacheStats
 from nq_cache.namespace import DEFAULT_NAMESPACE
-from nq_cache.policy import DEFAULT_CACHE_POLICY
+from nq_cache.policy import DEFAULT_CACHE_POLICY, CacheModuleConfigLike, policy_from_config
 
 
 class CacheError(Exception):
     """Raised on invalid key, namespace, TTL, or policy configuration."""
+
+
+def cache_engine_from_config(
+    config: CacheModuleConfigLike,
+    clock: Callable[[], float] | None = None,
+) -> CacheEngine:
+    """Build CacheEngine from a config (e.g. AppConfig.cache from nq_config)."""
+    return CacheEngine(policy=policy_from_config(config), clock=clock)
 
 
 class CacheEngine:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from nq_cache.engine import CacheEngine, CacheError
+from nq_cache.engine import CacheEngine, CacheError, cache_engine_from_config
 from nq_cache.models import CacheEntry, CachePolicy, CacheResult, CacheStats
 from nq_cache.namespace import (
     DEFAULT_NAMESPACE,
@@ -13,11 +13,13 @@ from nq_cache.namespace import (
     NAMESPACE_SYSTEM,
     NAMESPACES,
 )
-from nq_cache.policy import DEFAULT_CACHE_POLICY, default_policy
+from nq_cache.policy import DEFAULT_CACHE_POLICY, CacheModuleConfigLike, default_policy, policy_from_config
 
 __all__ = [
     "CacheEngine",
     "CacheError",
+    "CacheModuleConfigLike",
+    "cache_engine_from_config",
     "CacheEntry",
     "CachePolicy",
     "CacheResult",
@@ -25,6 +27,7 @@ __all__ = [
     "DEFAULT_CACHE_POLICY",
     "DEFAULT_NAMESPACE",
     "default_policy",
+    "policy_from_config",
     "NAMESPACE_OBSERVABILITY",
     "NAMESPACE_PORTFOLIO",
     "NAMESPACE_RISK",

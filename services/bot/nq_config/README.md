@@ -46,16 +46,18 @@ Boolean parsing is deterministic (`true`/`false`/`1`/`0`/`yes`/`no`/`on`/`off`, 
 - Empty required string after override → validation fails.
 - Nested invalid child config → `validate_app_config` raises; no partial use.
 
-## Intended future integration points
+## Config integration (Phase 25)
 
-- **nq_db**: read `app_config.db.db_path` (or keep using own config until migrated).
-- **nq_event_store**: read `app_config.event_store`.
-- **nq_cache**: build `CachePolicy` from `app_config.cache`.
-- **nq_risk**: use `app_config.risk` for limits.
-- **nq_portfolio**: use `app_config.portfolio` for governance limits.
-- **nq_metrics / nq_obs**: use `app_config.metrics` for observability toggles and namespace.
+Core modules support initialization from `AppConfig`:
 
-No deep wiring in this phase; modules can adopt incrementally.
+- **nq_db**: `engine_from_config(app_config.db)` builds `DatabaseEngine`.
+- **nq_event_store**: `engine_from_config(app_config.event_store)` builds `EventStoreEngine` (requires `event_store.db_path` set, e.g. via shared DB or `NQ_EVENT_STORE_PATH`).
+- **nq_cache**: `cache_engine_from_config(app_config.cache)` or `policy_from_config(app_config.cache)`.
+- **nq_risk**: `risk_limits_from_config(app_config.risk)` returns `RiskLimits`.
+- **nq_portfolio**: `portfolio_limits_from_config(app_config.portfolio)` returns `PortfolioLimits`.
+- **nq_metrics**: `observability_enabled(app_config.metrics)`, `default_report_namespace(app_config.metrics)`.
+
+Backward compatibility: existing no-arg constructors and module defaults remain; adopt `from_config` when using centralized config.
 
 ## Usage example
 

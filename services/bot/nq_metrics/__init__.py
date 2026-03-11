@@ -1,6 +1,11 @@
 # NEBULA-QUANT v1 | nq_metrics — performance analytics and observability layer
 # No broker integration. Analyzes performance data only. Observability is side-effect free.
 
+from nq_metrics.config import (
+    MetricsModuleConfigLike,
+    default_report_namespace,
+    observability_enabled,
+)
 from nq_metrics.engine import MetricsEngine
 from nq_metrics.models import (
     ControlDecisionSnapshot,
@@ -23,6 +28,9 @@ from nq_metrics.observability import (
 )
 
 __all__ = [
+    "MetricsModuleConfigLike",
+    "default_report_namespace",
+    "observability_enabled",
     "build_control_decision_snapshot",
     "build_execution_quality_snapshot",
     "build_experiment_summary",

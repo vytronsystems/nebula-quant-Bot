@@ -4,14 +4,28 @@ from __future__ import annotations
 
 import sqlite3
 from contextlib import contextmanager
-from typing import Any, Iterable
+from typing import Any, Iterable, Protocol
 
 from nq_db.config import DEFAULT_DB_CONFIG
 from nq_db.schema import apply_schema
 
 
+class DbPathConfig(Protocol):
+    """Protocol for config with db_path (e.g. nq_config.DatabaseModuleConfig)."""
+
+    db_path: str
+
+
 class DatabaseError(Exception):
     """Base error for nq_db persistence failures."""
+
+
+def engine_from_config(config: DbPathConfig) -> DatabaseEngine:
+    """Build DatabaseEngine from a config with db_path (e.g. AppConfig.db from nq_config)."""
+    path = getattr(config, "db_path", None)
+    if path is None or not str(path).strip():
+        raise DatabaseError("config.db_path must be non-empty")
+    return DatabaseEngine(db_path=path.strip())
 
 
 class DatabaseEngine:

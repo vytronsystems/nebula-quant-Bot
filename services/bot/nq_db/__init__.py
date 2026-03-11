@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from nq_db.config import DatabaseConfig, DEFAULT_DB_CONFIG
-from nq_db.engine import DatabaseEngine, DatabaseError
+from nq_db.engine import DatabaseEngine, DatabaseError, DbPathConfig, engine_from_config
 from nq_db.models import (
     DecisionRecord,
     ExecutionRecord,
@@ -26,6 +26,8 @@ __all__ = [
     "DEFAULT_DB_CONFIG",
     "DatabaseEngine",
     "DatabaseError",
+    "DbPathConfig",
+    "engine_from_config",
     "DecisionRecord",
     "DecisionRepository",
     "ExecutionRecord",
