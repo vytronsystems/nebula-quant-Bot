@@ -18,6 +18,7 @@ from nq_metrics.models import TradePerformance
 from nq_paper import PaperEngine
 from nq_promotion import PromotionEngine
 from nq_promotion.models import PromotionInput
+from nq_strategy_generation import StrategyGenerationEngine
 from nq_walkforward import WalkForwardEngine
 
 from nq_research_pipeline.models import ResearchCycleReport, ResearchPipelineError
@@ -60,6 +61,10 @@ class ResearchPipelineEngine:
         self,
         market_data: Sequence[Any] | None,
         regime_context: Any | None = None,
+        *,
+        strategy_engine: StrategyGenerationEngine | None = None,
+        strategy_inputs: dict[str, Any] | None = None,
+        enable_strategy_generation: bool = False,
     ) -> ResearchCycleReport:
         """
         Run a full research cycle over supplied market_data.
@@ -69,33 +74,45 @@ class ResearchPipelineEngine:
         """
         bars = list(_ensure_sequence(market_data, "market_data"))
 
-        # --- Step 1 — Discover strategies (nq_alpha_discovery) ---
-        observations = [
-            {
-                "category": "research_candidate",
-                "title": f"candidate-{idx}",
-                "strategy_id": f"strategy_{idx}",
-                "module": "nq_research_pipeline",
-            }
-            for idx, _ in enumerate(bars)
-        ]
-        alpha_engine = AlphaDiscoveryEngine(clock=self._clock)
-        alpha_report = alpha_engine.generate_hypotheses(
-            observations=observations if observations else None,
-        )
-        hypotheses = list(getattr(alpha_report, "hypotheses", []) or [])
-        strategy_ids: list[str] = []
-        for h in hypotheses:
-            sid = getattr(h, "related_strategy_id", None) or getattr(h, "hypothesis_id", "")
-            if sid:
-                strategy_ids.append(str(sid))
-        # De-duplicate while preserving order for determinism.
-        seen: set[str] = set()
-        unique_strategy_ids: list[str] = []
-        for sid in strategy_ids:
-            if sid not in seen:
-                seen.add(sid)
-                unique_strategy_ids.append(sid)
+        # --- Step 1 — Discover strategies (nq_alpha_discovery or nq_strategy_generation) ---
+        if enable_strategy_generation:
+            sg_engine = strategy_engine or StrategyGenerationEngine(clock=self._clock)
+            sg_inputs = strategy_inputs or {}
+            sg_report = sg_engine.generate_strategies(
+                market_observations=sg_inputs.get("market_observations"),
+                regime_context=sg_inputs.get("regime_context", regime_context),
+                learning_feedback=sg_inputs.get("learning_feedback"),
+            )
+            candidates = list(getattr(sg_report, "candidates", []) or [])
+            unique_strategy_ids = [c.strategy_id for c in candidates]
+        else:
+            observations = [
+                {
+                    "category": "research_candidate",
+                    "title": f"candidate-{idx}",
+                    "strategy_id": f"strategy_{idx}",
+                    "module": "nq_research_pipeline",
+                }
+                for idx, _ in enumerate(bars)
+            ]
+            alpha_engine = AlphaDiscoveryEngine(clock=self._clock)
+            alpha_report = alpha_engine.generate_hypotheses(
+                observations=observations if observations else None,
+            )
+            hypotheses = list(getattr(alpha_report, "hypotheses", []) or [])
+            strategy_ids: list[str] = []
+            for h in hypotheses:
+                sid = getattr(h, "related_strategy_id", None) or getattr(h, "hypothesis_id", "")
+                if sid:
+                    strategy_ids.append(str(sid))
+            # De-duplicate while preserving order for determinism.
+            seen: set[str] = set()
+            unique_strategy_ids: list[str] = []
+            for sid in strategy_ids:
+                if sid not in seen:
+                    seen.add(sid)
+                    unique_strategy_ids.append(sid)
+
         candidate_count = len(unique_strategy_ids)
 
         # --- Step 2 — Run experiments (nq_experiments) ---
