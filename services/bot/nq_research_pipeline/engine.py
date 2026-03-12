@@ -19,6 +19,7 @@ from nq_paper import PaperEngine
 from nq_promotion import PromotionEngine
 from nq_promotion.models import PromotionInput
 from nq_strategy_generation import StrategyGenerationEngine
+from nq_strategy_governance import StrategyGovernanceDecision, StrategyGovernanceEngine, StrategyGovernanceInput
 from nq_walkforward import WalkForwardEngine
 
 from nq_research_pipeline.models import ResearchCycleReport, ResearchPipelineError
@@ -65,6 +66,8 @@ class ResearchPipelineEngine:
         strategy_engine: StrategyGenerationEngine | None = None,
         strategy_inputs: dict[str, Any] | None = None,
         enable_strategy_generation: bool = False,
+        governance_engine: StrategyGovernanceEngine | None = None,
+        enable_governance: bool = False,
     ) -> ResearchCycleReport:
         """
         Run a full research cycle over supplied market_data.
@@ -222,6 +225,30 @@ class ResearchPipelineEngine:
                 approved.append(sid)
             else:
                 rejected.append(sid)
+
+        # --- Optional Strategy Governance (nq_strategy_governance) ---
+        if enable_governance and unique_strategy_ids:
+            gov_engine = governance_engine or StrategyGovernanceEngine(clock=self._clock)
+            final_approved: list[str] = []
+            final_rejected: list[str] = []
+            for sid in unique_strategy_ids:
+                gi = StrategyGovernanceInput(
+                    strategy_id=sid,
+                    backtest_summary=backtest_summary,
+                    walkforward_summary=walkforward_summary,
+                    paper_summary=paper_summary,
+                    metrics_summary=metrics_summary,
+                    edge_decay_summary={},
+                    audit_summary={},
+                    metadata={"pipeline": "nq_research_pipeline"},
+                )
+                gov_report = gov_engine.evaluate_strategy_readiness(gi)
+                if gov_report.decision == StrategyGovernanceDecision.APPROVED_FOR_LIVE:
+                    final_approved.append(sid)
+                else:
+                    final_rejected.append(sid)
+            approved = final_approved
+            rejected = final_rejected
 
         cycle_id = self._build_cycle_id(unique_strategy_ids)
         generated_at = self._now()
