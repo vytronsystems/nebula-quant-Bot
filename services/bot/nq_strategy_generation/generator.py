@@ -132,6 +132,7 @@ def generate_candidates_for_templates(
     market_observations: dict[str, Any] | None,
     regime_context: Any | None,
     learning_feedback: dict[str, Any] | None,
+    adaptation_context: dict[str, Any] | None = None,
 ) -> list[StrategyCandidate]:
     """
     Deterministically build candidate strategies from templates, parameters,
@@ -146,6 +147,16 @@ def generate_candidates_for_templates(
     feature_snapshot = dict(market_observations or {})
     requested_families = _families_from_features(market_observations, regime)
     feedback_weights = _families_from_feedback(learning_feedback)
+    adaptation = adaptation_context or {}
+    suppressed_families = set(adaptation.get("suppressed_families", []) or [])
+    excluded_regimes = set(adaptation.get("excluded_regimes", []) or [])
+    param_adj_map: dict[tuple[str, str], dict[str, Any]] = {}
+    for adj in adaptation.get("parameter_adjustments", []) or []:
+        fam = str(adj.get("family") or "")
+        param = str(adj.get("parameter") or "")
+        val = adj.get("value") or {}
+        if fam and param and isinstance(val, dict):
+            param_adj_map[(fam, param)] = val
 
     candidates: list[StrategyCandidate] = []
     for tpl in templates:
@@ -156,10 +167,36 @@ def generate_candidates_for_templates(
             continue
         if not _regime_allows(tpl, regime):
             continue
+        if fam.value in suppressed_families:
+            continue
+        if regime and regime in excluded_regimes:
+            continue
 
         # Match parameter sets by template prefix.
         matching_param_sets = [ps for ps in parameter_sets if ps.parameter_set_id.startswith(tpl.template_id + "-ps-")]
-        for idx, ps in enumerate(matching_param_sets):
+        # Apply any parameter range adjustments for this family.
+        filtered_param_sets: list[StrategyParameterSet] = []
+        for ps in matching_param_sets:
+            keep = True
+            for (adj_family, param), bounds in param_adj_map.items():
+                if adj_family != fam.value:
+                    continue
+                if param not in ps.parameters:
+                    continue
+                v = ps.parameters[param]
+                if not isinstance(v, (int, float)):
+                    continue
+                min_v = bounds.get("min")
+                max_v = bounds.get("max")
+                if min_v is not None and v < float(min_v):
+                    keep = False
+                    break
+                if max_v is not None and v > float(max_v):
+                    keep = False
+                    break
+            if keep:
+                filtered_param_sets.append(ps)
+        for idx, ps in enumerate(filtered_param_sets):
             strategy_id = f"{tpl.template_id}-{ps.parameter_set_id}"
             candidate_id = f"cand-{strategy_id}"
             rationale = f"{fam.value} candidate for regime {regime or 'UNKNOWN'} from template {tpl.template_id}"

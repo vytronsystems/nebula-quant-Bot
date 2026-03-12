@@ -40,12 +40,14 @@ class StrategyGenerationEngine:
         market_observations: dict[str, Any] | None,
         regime_context: Any | None,
         learning_feedback: dict[str, Any] | None,
+        adaptation_report: Any | None = None,
     ) -> str:
         """Deterministic hash-based report id derived from normalized inputs."""
         parts = [
             str(sorted((market_observations or {}).items())),
             str(regime_context),
             str(sorted((learning_feedback or {}).items())),
+            str(getattr(adaptation_report, "report_id", "")),
         ]
         base = "|".join(parts)
         digest = hashlib.sha256(base.encode("utf-8")).hexdigest()[:12]
@@ -70,6 +72,8 @@ class StrategyGenerationEngine:
         learning_feedback: dict[str, Any] | None = None,
         report_id: str | None = None,
         generated_at: float | None = None,
+        *,
+        adaptation_report: Any | None = None,
     ) -> StrategyGenerationReport:
         """
         Main entry point for deterministic strategy generation.
@@ -85,12 +89,27 @@ class StrategyGenerationEngine:
             expanded = expand_parameters_for_template(tpl)
             parameter_sets.extend(expanded)
 
+        # Build adaptation context from adaptation_report, if provided.
+        adaptation_context: dict[str, Any] | None = None
+        if adaptation_report is not None:
+            summary = getattr(adaptation_report, "summary", None)
+            if summary is not None:
+                suppressed = list(getattr(summary, "suppressed_families", []) or [])
+                excluded = list(getattr(summary, "excluded_regimes", []) or [])
+                param_adj = list(getattr(summary, "parameter_adjustments", []) or [])
+                adaptation_context = {
+                    "suppressed_families": suppressed,
+                    "excluded_regimes": excluded,
+                    "parameter_adjustments": param_adj,
+                }
+
         candidates: list[StrategyCandidate] = generate_candidates_for_templates(
             templates=templates,
             parameter_sets=parameter_sets,
             market_observations=market_observations,
             regime_context=regime_context,
             learning_feedback=learning_feedback,
+            adaptation_context=adaptation_context,
         )
 
         if self._max_candidates is not None:
@@ -107,7 +126,12 @@ class StrategyGenerationEngine:
             metadata={},
         )
 
-        rid = report_id or self._build_report_id(market_observations, regime_context, learning_feedback)
+        rid = report_id or self._build_report_id(
+            market_observations,
+            regime_context,
+            learning_feedback,
+            adaptation_report,
+        )
         now = generated_at if generated_at is not None else self._now()
         return StrategyGenerationReport(
             report_id=rid,
