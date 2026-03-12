@@ -42,8 +42,8 @@ Module Structure
     `BinancePositionMode`, `BinanceMarginType`.
 
 - `config.py`:
-  - `BinanceSymbolConfig`, `BinanceFuturesConfig`.
-  - `BINANCE_BTCUSDT_CONFIG` and `BINANCE_FUTURES_CONFIG` define:
+  - `BinanceSymbolConfig`, `BinanceFuturesConfig`, `BinanceOperationalConfig` (Phase 56–57).
+  - `BINANCE_BTCUSDT_CONFIG`, `BINANCE_FUTURES_CONFIG`, `BINANCE_OPERATIONAL_CONFIG` define:
     - base REST / websocket URLs (placeholders),
     - allowed symbols (`["BTCUSDT"]`),
     - leverage cap (`max_leverage=2`),
@@ -80,12 +80,21 @@ Module Structure
     Binance-style payloads into typed models.
 
 - `execution.py`:
-  - `BinanceExecutionAdapter`:
-    - `validate_order(order)`
-    - `map_order(order)` → `(BinanceOrderRequest, payload dict)`
-    - `submit_order(order)` → `BinanceExecutionResult` (simulated)
-    - `cancel_order(order_id, symbol)` (simulated)
-    - `get_order_status(order_id, symbol)` (simulated)
+  - `BinanceExecutionAdapter(safeguards=None)`:
+    - Optional `safeguards`: if set, `assert_can_send_live` is called before submit (fail closed).
+    - `validate_order(order)`, `map_order(order)`, `submit_order(order)` → `BinanceExecutionResult`,
+    - `cancel_order(order_id, symbol)`, `get_order_status(order_id, symbol)` (simulated when no transport).
+
+- `paper.py` (Phase 56):
+  - Paper/shadow execution: `BinancePaperTradingEngine(mode="paper"|"shadow", ...)`.
+  - Models: `BinancePaperOrder`, `BinancePaperFill`, `BinancePaperPosition`, `BinancePaperAccountState`, `BinancePaperSessionReport`.
+  - Paper: simulated fills and in-memory positions/balances. Shadow: records intended orders only, no live send.
+
+- `safeguards.py` (Phase 57):
+  - `BinanceLiveSafeguards`: max_daily_loss, max_position_size, max_notional_per_order, max_open_positions,
+    order_rate_limit, venue_enabled, leverage cap, kill_switch, heartbeat, optional reconciliation.
+  - 24/7: UTC-based daily reset, rolling order window, continuous kill switch. Fail closed.
+  - `BinanceSafeguardDecision`, `BinanceSafeguardState`, `SAFEGUARD_FAILURE_CATEGORIES` for nq_sre/nq_runbooks.
 
 - `account.py`:
   - `BinanceAccountAdapter`:
@@ -144,6 +153,38 @@ Validation Philosophy
   - `BinanceAdapterError` for mapping/payload-related failures.
 
 
+Phase 56–57: Paper / Shadow and Live Safeguards
+-----------------------------------------------
+
+**Modes**
+
+- **Paper**: Fully simulated execution on Binance-normalized market data; in-memory balances, positions, orders, fills, PnL. No live risk.
+- **Shadow**: Strategy produces orders/signals; system records intended orders only; no live submission. Enables later comparison of intended vs observed state.
+- **Live**: Controlled by config and safeguards; remains **disabled by default**. Requires venue enabled, kill switch off, heartbeat fresh, and all limits satisfied.
+
+**24/7/365 assumptions**
+
+Binance Futures runs continuously. This layer does **not** rely on market open/close or session-close resets. Instead:
+
+- **UTC-based reset**: Daily risk controls (e.g. max_daily_loss, daily counts) use a configurable `binance_reset_hour_utc` (default 0). The “day” rolls at that hour in UTC.
+- **Rolling windows**: Order rate and similar limits use a rolling window (e.g. last N minutes) rather than a fixed session.
+- **Heartbeat**: If heartbeat/transport freshness is stale beyond `binance_heartbeat_timeout_seconds`, live routing fails closed.
+- **Kill switch**: Works regardless of time; when active, no live orders are sent.
+
+**Safeguards (fail closed)**
+
+- Venue disabled → no live send.
+- Kill switch active → no live send.
+- Heartbeat stale → no live send.
+- Daily loss limit, position size, notional, open positions, order rate, leverage cap → each enforced explicitly; breach raises `BinanceSafeguardError`.
+
+**Integration**
+
+- **nq_exec**: Execution path can pass a `BinanceLiveSafeguards` instance into `BinanceExecutionAdapter`; `submit_order` calls `assert_can_send_live` before mapping/send when safeguards are present.
+- **nq_guardrails**: Existing guardrails remain in place; Binance safeguards are an additional exchange-facing layer.
+- **nq_sre / nq_runbooks**: `BinanceSafeguardDecision.category` and `SAFEGUARD_FAILURE_CATEGORIES` (e.g. `heartbeat_stale`, `kill_switch_active`, `daily_loss_limit_hit`, `order_rate_limit_hit`) support future incident routing and runbook lookup.
+
+
 Future Extensions
 -----------------
 
@@ -153,7 +194,6 @@ Planned future work (outside Phase 51):
 - WebSocket feeds for live market data and order updates.
 - Reconciliation between internal state and exchange state.
 - Multi-symbol and multi-venue expansion beyond BTCUSDT.
-- Configurable paper/live switching at the adapter/transport level.
-- Integration with `nq_exec`, `nq_risk`, `nq_guardrails`,
-  and `nq_strategy_governance` via a venue/adapter registry.
+- Full live activation only after governance and risk sign-off; paper/shadow remain the default operational modes until then.
+- Deeper integration with `nq_exec`, `nq_risk`, `nq_guardrails`, `nq_sre`, `nq_runbooks` via venue/adapter registry.
 

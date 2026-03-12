@@ -17,16 +17,14 @@ class BinanceExecutionAdapter:
     """
     Architecture-level execution adapter for Binance USDT-M Futures.
 
-    In Phase 51 this adapter:
     - validates normalized internal orders,
     - maps them to Binance REST payloads,
-    - simulates deterministic responses for unit testing.
-
-    No real network calls or secrets are used.
+    - simulates deterministic responses when transport is not provided.
+    - optional safeguards: if provided, assert_can_send_live is called before submit (fail closed).
     """
 
-    def __init__(self) -> None:
-        pass
+    def __init__(self, safeguards: Any | None = None) -> None:
+        self._safeguards = safeguards
 
     def validate_order(self, order: NormalizedOrderRequest) -> None:
         req = map_internal_order_to_binance(order)
@@ -42,9 +40,17 @@ class BinanceExecutionAdapter:
     def submit_order(self, order: NormalizedOrderRequest) -> BinanceExecutionResult:
         """
         Validate and map an order, returning a deterministic simulated response.
-
-        The response shape mirrors Binance but is generated locally.
+        If safeguards is set, assert_can_send_live is called first (fail closed).
         """
+        if self._safeguards is not None:
+            notional = (order.price or 0.0) * order.quantity
+            self._safeguards.assert_can_send_live(
+                leverage=order.leverage,
+                position_size=order.quantity,
+                notional=notional,
+                open_positions_count=0,
+            )
+            self._safeguards.record_order()
         req, payload = self.map_order(order)
         # Simulate deterministic "NEW" response; orderId derived from hash of payload.
         order_id = abs(hash(tuple(sorted(payload.items())))) % 10_000_000

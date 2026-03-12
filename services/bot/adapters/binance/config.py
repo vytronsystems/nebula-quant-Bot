@@ -55,3 +55,29 @@ BINANCE_FUTURES_CONFIG = BinanceFuturesConfig(
     metadata={"exchange": "binance", "market": "USDT-M Futures"},
 )
 
+
+@dataclass(slots=True)
+class BinanceOperationalConfig:
+    """
+    Binance operational mode and safeguard defaults.
+    24/7/365: no market open/close; use UTC reset and rolling windows.
+    No secrets; live disabled by default.
+    """
+
+    binance_paper_enabled: bool = True
+    binance_shadow_enabled: bool = True
+    binance_live_enabled: bool = False
+    binance_kill_switch_enabled: bool = True
+    binance_max_daily_loss: float = 5000.0
+    binance_max_order_rate_per_minute: int = 10
+    binance_max_position_size: float = 1.0
+    binance_max_notional_per_order: float = 100_000.0
+    binance_max_open_positions: int = 5
+    binance_heartbeat_timeout_seconds: float = 60.0
+    binance_reset_hour_utc: int = 0
+    binance_rolling_window_minutes: int = 5
+    metadata: dict[str, Any] = field(default_factory=dict)
+
+
+BINANCE_OPERATIONAL_CONFIG = BinanceOperationalConfig()
+
