@@ -1,60 +1,58 @@
-# NEBULA-QUANT v1 | Module Catalog
+# NEBULA-QUANT v1 | Module Catalog (Resumen)
 
-## Módulos existentes o previstos
+Este documento es un **resumen histórico** de los módulos previstos.  
+La fuente de verdad actualizada para el estado de cada módulo es `docs/MODULE_CATALOG.md`.
 
-### Core operativo
-- nq_data
-- nq_strategy
-- nq_risk
-- nq_exec
-- nq_portfolio
-- nq_guardrails
+## Módulos implementados (vista rápida)
 
-### Research
-- nq_research
-- nq_backtest
-- nq_walkforward
-- nq_montecarlo
-- nq_lab
-- nq_strategy_registry
-- nq_alpha_discovery
-- nq_regime
-- nq_edge_decay
+Todos los módulos de la lista siguiente están **IMPLEMENTED**, con **tests: YES** y **readme: YES**.  
+Para descripciones detalladas, ver `docs/MODULE_CATALOG.md`.
 
-### Auditoría y mejora continua
-- nq_audit
-- nq_trade_review
-- nq_learning
-- nq_improvement
-- nq_reporting
-- nq_decision_archive
+- Core operativo y pipeline:
+  - `nq_data`
+  - `nq_data_quality`
+  - `nq_strategy`
+  - `nq_risk`
+  - `nq_backtest`
+  - `nq_walkforward`
+  - `nq_paper`
+  - `nq_guardrails`
+  - `nq_exec`
+  - `nq_metrics`
+  - `nq_experiments`
+  - `nq_portfolio`
+  - `nq_promotion`
 
-### Software factory
-- nq_orchestrator
-- nq_architecture_gate
-- nq_qa_gate
-- nq_release
-- nq_gitops
+- Infraestructura y persistencia:
+  - `nq_db`
+  - `nq_event_store`
+  - `nq_cache`
+  - `nq_config`
+  - `nq_scheduler`
+  - `nq_orchestrator`
 
-### Observabilidad y operaciones
-- nq_obs
-- nq_metrics
-- nq_alerting
-- nq_sre
-- nq_runbooks
-- nq_scheduler
+- Observabilidad y operaciones:
+  - `nq_obs`
+  - `nq_sre`
+  - `nq_runbooks`
+  - `nq_release`
+  - `nq_reporting`
 
-### Datos y persistencia
-- nq_db
-- nq_cache
-- nq_event_store
-- nq_config
+- Registro, auditoría y mejora:
+  - `nq_strategy_registry`
+  - `nq_audit`
+  - `nq_trade_review`
+  - `nq_learning`
+  - `nq_improvement`
+  - `nq_decision_archive`
 
-## Prioridad inmediata
-Los módulos a atacar primero son:
-1. nq_data
-2. nq_strategy
-3. nq_risk
-4. nq_backtest
-5. nq_audit
-6. nq_research
+- Research / análisis:
+  - `nq_alpha_discovery`
+  - `nq_regime`
+  - `nq_edge_decay`
+
+## Nota
+
+Para el estado exacto, contratos públicos, y notas de integración de cada módulo, utilizar siempre:  
+`docs/MODULE_CATALOG.md` (actualizado en la Fase 44 — Documentation Alignment).
+
