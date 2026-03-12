@@ -114,10 +114,17 @@ class SystemReport:
 
     report_id: str
     generated_at: float
+    # Existing analytical subreports
     audit_report: AuditSummaryReport | None = None
     trade_review_report: TradeReviewSummaryReport | None = None
     learning_report: LearningSummaryReport | None = None
     improvement_report: ImprovementSummaryReport | None = None
     experiment_report: ExperimentSummaryReport | None = None
     observability_report: ObservabilitySummaryReport | None = None
+    # Operational governance subreports (Phase 45)
+    sre_report: Any | None = None
+    runbook_report: Any | None = None
+    release_report: Any | None = None
+    # High-level system summary for dashboards / governance
+    summary: dict[str, Any] | None = field(default_factory=dict)
     metadata: dict[str, Any] | None = field(default_factory=dict)
