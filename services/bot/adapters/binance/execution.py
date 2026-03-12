@@ -21,10 +21,16 @@ class BinanceExecutionAdapter:
     - maps them to Binance REST payloads,
     - simulates deterministic responses when transport is not provided.
     - optional safeguards: if provided, assert_can_send_live is called before submit (fail closed).
+    - optional activation_engine: when strategy_id is provided on submit_order, assert_live_activation_allowed is called (fail closed).
     """
 
-    def __init__(self, safeguards: Any | None = None) -> None:
+    def __init__(
+        self,
+        safeguards: Any | None = None,
+        activation_engine: Any | None = None,
+    ) -> None:
         self._safeguards = safeguards
+        self._activation_engine = activation_engine
 
     def validate_order(self, order: NormalizedOrderRequest) -> None:
         req = map_internal_order_to_binance(order)
@@ -37,11 +43,15 @@ class BinanceExecutionAdapter:
         payload = build_binance_order_payload(req)
         return req, payload
 
-    def submit_order(self, order: NormalizedOrderRequest) -> BinanceExecutionResult:
+    def submit_order(self, order: NormalizedOrderRequest, strategy_id: str | None = None) -> BinanceExecutionResult:
         """
         Validate and map an order, returning a deterministic simulated response.
         If safeguards is set, assert_can_send_live is called first (fail closed).
+        If strategy_id is provided and activation_engine is set, assert_live_activation_allowed is called (fail closed).
+        Paper/shadow flows do not pass strategy_id and are unaffected.
         """
+        if strategy_id is not None and self._activation_engine is not None:
+            self._activation_engine.assert_live_activation_allowed(strategy_id, venue="binance")
         if self._safeguards is not None:
             notional = (order.price or 0.0) * order.quantity
             self._safeguards.assert_can_send_live(

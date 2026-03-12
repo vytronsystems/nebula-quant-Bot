@@ -80,10 +80,17 @@ Module Structure
     Binance-style payloads into typed models.
 
 - `execution.py`:
-  - `BinanceExecutionAdapter(safeguards=None)`:
+  - `BinanceExecutionAdapter(safeguards=None, activation_engine=None)`:
     - Optional `safeguards`: if set, `assert_can_send_live` is called before submit (fail closed).
-    - `validate_order(order)`, `map_order(order)`, `submit_order(order)` → `BinanceExecutionResult`,
+    - Optional `activation_engine`: when `strategy_id` is passed to `submit_order`, `assert_live_activation_allowed` is called (fail closed).
+    - `validate_order(order)`, `map_order(order)`, `submit_order(order, strategy_id=None)` → `BinanceExecutionResult`,
     - `cancel_order(order_id, symbol)`, `get_order_status(order_id, symbol)` (simulated when no transport).
+
+- `activation.py` (Phase 58):
+  - `BinanceLiveActivationConfig`, `BINANCE_LIVE_ACTIVATION_CONFIG`: shadow/paper enabled, live disabled by default; performance thresholds and governance.
+  - `BinanceActivationEngine`: `evaluate_strategy_eligibility`, `update_allowed_live_strategies`, `assert_strategy_live_eligible`, `assert_live_activation_allowed`.
+  - `StrategyPerformanceMetrics`, `StrategyEligibilityRecord`, `BinanceActivationReport`.
+  - Venue policy: Binance first live venue; TradeStation disabled by default.
 
 - `paper.py` (Phase 56):
   - Paper/shadow execution: `BinancePaperTradingEngine(mode="paper"|"shadow", ...)`.
@@ -183,6 +190,37 @@ Binance Futures runs continuously. This layer does **not** rely on market open/c
 - **nq_exec**: Execution path can pass a `BinanceLiveSafeguards` instance into `BinanceExecutionAdapter`; `submit_order` calls `assert_can_send_live` before mapping/send when safeguards are present.
 - **nq_guardrails**: Existing guardrails remain in place; Binance safeguards are an additional exchange-facing layer.
 - **nq_sre / nq_runbooks**: `BinanceSafeguardDecision.category` and `SAFEGUARD_FAILURE_CATEGORIES` (e.g. `heartbeat_stale`, `kill_switch_active`, `daily_loss_limit_hit`, `order_rate_limit_hit`) support future incident routing and runbook lookup.
+
+
+Phase 58: Controlled Live Activation
+------------------------------------
+
+**Philosophy**
+
+- Live remains **disabled by default**. Shadow and paper are **enabled by default**.
+- No strategy is allowed for live by default; `allowed_live_strategies` is empty until performance and governance gates are met.
+- Strategies become live-eligible only after proving performance in shadow/paper against configured thresholds.
+
+**Shadow vs paper vs live (definitions)**
+
+- **Shadow**: Records intended orders only; does not open simulated positions. Used for logic validation.
+- **Paper**: Simulates fills, PnL, positions. Used for operational and performance validation.
+- **Live**: Real exchange-facing execution; only allowed for eligible strategies when live is enabled and venue/safeguards allow.
+
+**Performance-gated selection**
+
+- Eligibility uses: win_rate, RR, profit_factor, expectancy, max_drawdown_pct, shadow_trade_count, paper_trade_count, and (when required) governance approval.
+- A strategy is live-eligible only if it meets **all** configured thresholds; otherwise it remains excluded from `allowed_live_strategies`.
+- `BinanceActivationEngine.evaluate_strategy_eligibility` returns `StrategyEligibilityRecord` with reasons and failed metrics; `update_allowed_live_strategies` updates the allowed list deterministically.
+
+**Venue policy**
+
+- **Binance** is the first live venue (configurable; enabled by default for the adapter).
+- **TradeStation** remains disabled by default until capital goals are met; `assert_live_activation_allowed(..., venue="tradestation")` fails closed when TradeStation is disabled.
+
+**Relationship to safeguards, governance, venue control**
+
+- Activation does not replace `BinanceLiveSafeguards`, nq_strategy_governance, or venue enable/disable; it adds an explicit layer: live must be enabled, strategy must be in `allowed_live_strategies`, venue must be enabled, and safeguards must pass before live send. Execution path: activation gate (strategy + venue + live) → safeguards → send.
 
 
 Future Extensions
