@@ -74,3 +74,10 @@ Strategies move forward only through validated evidence:
 6. **Retired** — explicit lifecycle state when edge decays or risk profile changes.
 
 `nq_strategy_registry` stores lifecycle state; `nq_promotion` and `nq_portfolio` enforce governance decisions using that truth.
+
+## Environment and secrets
+
+- **Secrets** (DB passwords, Telegram tokens, API keys) must not be committed. Use environment variables and `.env` (not committed); see `.env.example` and `docker/.env.example`.
+- **Docker Compose** reads `POSTGRES_*`, `GRAFANA_ADMIN_*`, and optional `TELEGRAM_*` from the environment; defaults are for local use only.
+- **Telegram alerts**: set `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID`, then run `docker/scripts/nq-alertmanager-telegram-enable.sh` to generate Alertmanager config and restart the service.
+- **Test execution**: from repo root, `python3 -m unittest discover -s tests` and (with pytest installed) `python3 -m pytest services/bot`; ensure no hardcoded secrets before pushing.

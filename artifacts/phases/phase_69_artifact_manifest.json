@@ -1,0 +1,19 @@
+{
+  "phase": 69,
+  "title": "Executive Dashboard",
+  "artifacts": [
+    "artifacts/phases/phase_69_result.md",
+    "artifacts/tests/phase_69_test_report.html",
+    "artifacts/audits/phase_69_audit_report.html",
+    "artifacts/phases/phase_69_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "apps/web/src/app/executive/page.tsx",
+    "apps/web/src/app/executive/pnl/page.tsx",
+    "apps/web/src/app/executive/venues/page.tsx",
+    "apps/web/src/app/executive/targets/page.tsx",
+    "apps/web/src/app/executive/strategies/page.tsx",
+    "apps/web/src/app/executive/capital/page.tsx",
+    "apps/web/src/app/executive/incidents/page.tsx"
+  ]
+}

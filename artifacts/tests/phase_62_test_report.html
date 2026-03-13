@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 62 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} .pass{color:green;} .skip{color:orange;}</style>
+</head>
+<body>
+  <h1>Phase 62 — Test Report</h1>
+  <p><strong>Phase:</strong> 62 — Binance Account Sync</p>
+  <p><strong>Run:</strong> <code>PYTHONPATH=services/bot python3 -m unittest adapters.binance.tests.test_account_sync -v</code></p>
+  <ul>
+    <li class="pass">TestBalanceEquityFromState.test_usdt_balance_and_equity — PASS</li>
+    <li class="skip">TestBinanceAccountSyncService.test_save_and_get_latest_skipped_without_db — SKIP (psycopg not installed or DB not available)</li>
+  </ul>
+  <p><strong>Result:</strong> 1 passed, 1 skipped.</p>
+</body>
+</html>

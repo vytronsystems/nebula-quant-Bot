@@ -1,0 +1,31 @@
+{
+  "phase": 67,
+  "title": "Frontend Foundation",
+  "artifacts": [
+    "artifacts/phases/phase_67_result.md",
+    "artifacts/tests/phase_67_test_report.html",
+    "artifacts/audits/phase_67_audit_report.html",
+    "artifacts/phases/phase_67_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "apps/web/package.json",
+    "apps/web/next.config.js",
+    "apps/web/tailwind.config.ts",
+    "apps/web/postcss.config.js",
+    "apps/web/tsconfig.json",
+    "apps/web/README.md",
+    "apps/web/src/app/globals.css",
+    "apps/web/src/app/layout.tsx",
+    "apps/web/src/app/page.tsx",
+    "apps/web/src/components/theme-provider.tsx",
+    "apps/web/src/components/ui/card.tsx",
+    "apps/web/src/lib/utils.ts",
+    "apps/web/src/contexts/language-context.tsx",
+    "apps/web/src/app/operator/layout.tsx",
+    "apps/web/src/app/operator/page.tsx",
+    "apps/web/src/app/operator/venues/page.tsx",
+    "apps/web/src/app/operator/instruments/page.tsx",
+    "apps/web/src/app/executive/layout.tsx",
+    "apps/web/src/app/executive/page.tsx"
+  ]
+}

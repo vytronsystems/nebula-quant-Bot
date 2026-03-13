@@ -1,13 +1,11 @@
+global:
+  resolve_timeout: 5m
+
 route:
-  receiver: telegram
+  receiver: null
   group_wait: 10s
   group_interval: 1m
   repeat_interval: 3h
 
 receivers:
-  - name: telegram
-    telegram_configs:
-      - bot_token: "7800239967:AAFtw1q7qxnRBxnWTYq6rYdyP88yBqUeBr4"
-        chat_id: 7455432965
-        parse_mode: "Markdown"
-        send_resolved: true
+- name: null

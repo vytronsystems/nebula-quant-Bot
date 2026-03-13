@@ -1,0 +1,19 @@
+{
+  "phase": 61,
+  "title": "Instrument Registry and Activation Control",
+  "artifacts": [
+    "artifacts/phases/phase_61_result.md",
+    "artifacts/tests/phase_61_test_report.html",
+    "artifacts/audits/phase_61_audit_report.html",
+    "artifacts/phases/phase_61_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "services/bot/nq_instrument_registry/__init__.py",
+    "services/bot/nq_instrument_registry/models.py",
+    "services/bot/nq_instrument_registry/service.py",
+    "services/bot/nq_instrument_registry/tests/__init__.py",
+    "services/bot/nq_instrument_registry/tests/test_instrument_registry.py",
+    "docs/contracts/instrument_registry_api.md",
+    "docs/contracts/instrument_control_ui.md"
+  ]
+}

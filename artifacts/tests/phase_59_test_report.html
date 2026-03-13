@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 59 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} table{border-collapse:collapse;} th,td{border:1px solid #ccc;padding:.25rem .5rem;} th{background:#eee;} .pass{color:green;} .fail{color:red;}</style>
+</head>
+<body>
+  <h1>Phase 59 — Test Report</h1>
+  <p><strong>Phase:</strong> 59 — Security Cleanup and Packaging Stabilization</p>
+  <p><strong>Run from repo root:</strong> <code>python3 -m unittest discover -s tests</code></p>
+  <h2>Root-level tests (tests/)</h2>
+  <table>
+    <thead><tr><th>Test</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>test_cli_tools.TestCLITools.test_generate_system_report_runs</td><td class="pass">PASS</td></tr>
+      <tr><td>test_cli_tools.TestCLITools.test_evaluate_system_health_runs</td><td class="pass">PASS</td></tr>
+      <tr><td>test_cli_tools.TestCLITools.test_release_check_returns_status</td><td class="pass">PASS</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Result:</strong> 3 passed.</p>
+  <p><strong>Note:</strong> Full suite in <code>services/bot</code> is run with <code>python3 -m pytest services/bot</code> (pytest not installed in this run). Packaging fix (ROOT on path, scripts as package) resolves the prior scripts-import failures for root-level tests.</p>
+</body>
+</html>

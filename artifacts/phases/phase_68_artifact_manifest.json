@@ -1,0 +1,21 @@
+{
+  "phase": 68,
+  "title": "Operator Cockpit",
+  "artifacts": [
+    "artifacts/phases/phase_68_result.md",
+    "artifacts/tests/phase_68_test_report.html",
+    "artifacts/audits/phase_68_audit_report.html",
+    "artifacts/phases/phase_68_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "apps/web/src/app/operator/page.tsx",
+    "apps/web/src/app/operator/venues/page.tsx",
+    "apps/web/src/app/operator/instruments/page.tsx",
+    "apps/web/src/app/operator/strategies/page.tsx",
+    "apps/web/src/app/operator/paper/page.tsx",
+    "apps/web/src/app/operator/live/page.tsx",
+    "apps/web/src/app/operator/orders/page.tsx",
+    "apps/web/src/app/operator/risk/page.tsx",
+    "apps/web/src/app/operator/audit/page.tsx"
+  ]
+}

@@ -1,0 +1,20 @@
+{
+  "phase": 63,
+  "title": "Reconciliation Layer",
+  "artifacts": [
+    "artifacts/phases/phase_63_result.md",
+    "artifacts/tests/phase_63_test_report.html",
+    "artifacts/audits/phase_63_audit_report.html",
+    "artifacts/phases/phase_63_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "services/bot/nq_reconciliation/__init__.py",
+    "services/bot/nq_reconciliation/models.py",
+    "services/bot/nq_reconciliation/order_reconciliation.py",
+    "services/bot/nq_reconciliation/position_reconciliation.py",
+    "services/bot/nq_reconciliation/pnl_reconciliation.py",
+    "services/bot/nq_reconciliation/README.md",
+    "services/bot/nq_reconciliation/tests/__init__.py",
+    "services/bot/nq_reconciliation/tests/test_reconciliation.py"
+  ]
+}

@@ -4,9 +4,9 @@ services:
     container_name: nq-postgres
     restart: unless-stopped
     environment:
-      POSTGRES_USER: nebula
-      POSTGRES_PASSWORD: nebula123
-      POSTGRES_DB: trading
+      POSTGRES_USER: ${POSTGRES_USER:-nebula}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-nebula123}
+      POSTGRES_DB: ${POSTGRES_DB:-trading}
     ports:
       - "5432:5432"
     volumes:
@@ -44,8 +44,8 @@ services:
     ports:
       - "3000:3000"
     environment:
-      GF_SECURITY_ADMIN_USER: admin
-      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_SECURITY_ADMIN_USER: ${GRAFANA_ADMIN_USER:-admin}
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
       GF_USERS_ALLOW_SIGN_UP: "false"
     volumes:
       - grafana_data:/var/lib/grafana
@@ -64,8 +64,7 @@ services:
     container_name: nq-postgres-exporter
     restart: unless-stopped
     environment:
-      # DSN apunta al servicio "postgres" en la misma red
-      DATA_SOURCE_NAME: "postgresql://nebula:nebula123@postgres:5432/trading?sslmode=disable"
+      DATA_SOURCE_NAME: "postgresql://${POSTGRES_USER:-nebula}:${POSTGRES_PASSWORD:-nebula123}@postgres:5432/${POSTGRES_DB:-trading}?sslmode=disable"
     ports:
       - "9187:9187"
     depends_on:
@@ -86,7 +85,7 @@ services:
     container_name: nq-bot
     restart: unless-stopped
     environment:
-      PG_DSN: "postgresql://nebula:nebula123@postgres:5432/trading"
+      PG_DSN: "postgresql://${POSTGRES_USER:-nebula}:${POSTGRES_PASSWORD:-nebula123}@postgres:5432/${POSTGRES_DB:-trading}"
       REDIS_HOST: "redis"
       PYTHONPATH: /app
       NQ_ENV: local

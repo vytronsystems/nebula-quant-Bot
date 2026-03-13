@@ -1,0 +1,18 @@
+{
+  "phase": 60,
+  "title": "Evidence Backbone",
+  "artifacts": [
+    "artifacts/phases/phase_60_result.md",
+    "artifacts/tests/phase_60_test_report.html",
+    "artifacts/audits/phase_60_audit_report.html",
+    "artifacts/phases/phase_60_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "docker/db/migrations/003_evidence_backbone.sql",
+    "services/bot/nq_evidence/__init__.py",
+    "services/bot/nq_evidence/backend.py"
+  ],
+  "evidence": [
+    "phase_execution_log.jsonl"
+  ]
+}

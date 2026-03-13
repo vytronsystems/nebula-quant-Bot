@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 60 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} table{border-collapse:collapse;} th,td{border:1px solid #ccc;padding:.25rem .5rem;} th{background:#eee;} .pass{color:green;}</style>
+</head>
+<body>
+  <h1>Phase 60 — Test Report</h1>
+  <p><strong>Phase:</strong> 60 — Evidence Backbone</p>
+  <h2>Verification</h2>
+  <ul>
+    <li>Migration <code>003_evidence_backbone.sql</code> applied successfully (tables created).</li>
+    <li><code>nq_evidence</code> package added; helpers callable from repo root when <code>services/bot</code> is on PYTHONPATH.</li>
+    <li>No new pytest/unittest in this phase; existing suite unchanged. Future phases will integrate DB registration.</li>
+  </ul>
+  <p><strong>Result:</strong> PASS (evidence backbone in place).</p>
+</body>
+</html>

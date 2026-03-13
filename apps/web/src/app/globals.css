@@ -1,0 +1,18 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: 222 47% 11%;
+  --foreground: 210 40% 98%;
+  --nebula-cyan: 188 100% 50%;
+  --nebula-violet: 263 70% 58%;
+  --nebula-green: 142 71% 45%;
+  --nebula-amber: 38 92% 50%;
+  --nebula-red: 0 84% 60%;
+}
+
+.light {
+  --background: 0 0% 100%;
+  --foreground: 222 47% 11%;
+}

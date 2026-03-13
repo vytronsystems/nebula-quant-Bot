@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 64 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} .pass{color:green;}</style>
+</head>
+<body>
+  <h1>Phase 64 — Test Report</h1>
+  <p><strong>Phase:</strong> 64 — TradeStation Options Adapter Foundation</p>
+  <p><strong>Run:</strong> <code>PYTHONPATH=services/bot python3 -m unittest adapters.tradestation.tests.test_tradestation -v</code></p>
+  <ul>
+    <li class="pass">TestTSOptionContract.test_dte — PASS</li>
+    <li class="pass">TestTradeStationOptionSelector.test_long_call_only — PASS</li>
+    <li class="pass">TestTradeStationOptionSelector.test_invalid_direction_empty — PASS</li>
+  </ul>
+  <p><strong>Result:</strong> 3 passed.</p>
+</body>
+</html>

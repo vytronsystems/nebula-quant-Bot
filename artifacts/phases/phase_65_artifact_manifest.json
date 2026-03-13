@@ -1,0 +1,19 @@
+{
+  "phase": 65,
+  "title": "Cross-Venue Services",
+  "artifacts": [
+    "artifacts/phases/phase_65_result.md",
+    "artifacts/tests/phase_65_test_report.html",
+    "artifacts/audits/phase_65_audit_report.html",
+    "artifacts/phases/phase_65_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "services/bot/nq_cross_venue/__init__.py",
+    "services/bot/nq_cross_venue/models.py",
+    "services/bot/nq_cross_venue/venue_service.py",
+    "services/bot/nq_cross_venue/account_summary_service.py",
+    "services/bot/nq_cross_venue/risk_movement.py",
+    "services/bot/nq_cross_venue/tests/__init__.py",
+    "services/bot/nq_cross_venue/tests/test_cross_venue.py"
+  ]
+}

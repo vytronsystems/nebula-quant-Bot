@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 63 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} .pass{color:green;}</style>
+</head>
+<body>
+  <h1>Phase 63 — Test Report</h1>
+  <p><strong>Phase:</strong> 63 — Reconciliation Layer</p>
+  <p><strong>Run:</strong> <code>PYTHONPATH=services/bot python3 -m unittest nq_reconciliation.tests.test_reconciliation -v</code></p>
+  <ul>
+    <li class="pass">TestOrderReconciliation.test_empty_ok — PASS</li>
+    <li class="pass">TestPositionReconciliation.test_empty_ok — PASS</li>
+    <li class="pass">TestPnLReconciliation.test_match_ok — PASS</li>
+    <li class="pass">TestPnLReconciliation.test_mismatch — PASS</li>
+  </ul>
+  <p><strong>Result:</strong> 4 passed.</p>
+</body>
+</html>

@@ -15,8 +15,8 @@ def _configure_path() -> None:
     services_bot = ROOT / "services" / "bot"
     if str(services_bot) not in sys.path:
         sys.path.insert(0, str(services_bot))
-    if str(SCRIPTS_DIR) not in sys.path:
-        sys.path.insert(0, str(SCRIPTS_DIR))
+    if str(ROOT) not in sys.path:
+        sys.path.insert(0, str(ROOT))
 
 
 class TestCLITools(unittest.TestCase):

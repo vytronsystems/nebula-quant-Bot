@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 60 — Audit Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} table{border-collapse:collapse;} th,td{border:1px solid #ccc;padding:.25rem .5rem;} th{background:#eee;}</style>
+</head>
+<body>
+  <h1>Phase 60 — Audit Report</h1>
+  <p><strong>Phase:</strong> 60 — Evidence Backbone</p>
+  <h2>Audit</h2>
+  <ul>
+    <li>DB schema: 9 tables added (phase_execution_log, artifact_registry, audit_run, test_run, promotion_review, paper_trading_daily_snapshot, venue_account_snapshot, instrument_registry, instrument_activation_log).</li>
+    <li>Artifacts layout: compliant with spec (phases, tests, audits, backtests, walkforward, paper-trading, frontend-review, releases).</li>
+    <li>Helpers: nq_evidence backend uses env PG_DSN; no secrets in code.</li>
+  </ul>
+  <p><strong>Status:</strong> OK.</p>
+</body>
+</html>

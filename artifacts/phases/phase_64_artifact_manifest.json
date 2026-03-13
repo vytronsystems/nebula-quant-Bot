@@ -1,0 +1,18 @@
+{
+  "phase": 64,
+  "title": "TradeStation Options Adapter Foundation",
+  "artifacts": [
+    "artifacts/phases/phase_64_result.md",
+    "artifacts/tests/phase_64_test_report.html",
+    "artifacts/audits/phase_64_audit_report.html",
+    "artifacts/phases/phase_64_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "services/bot/adapters/tradestation/__init__.py",
+    "services/bot/adapters/tradestation/models.py",
+    "services/bot/adapters/tradestation/option_selection.py",
+    "services/bot/adapters/tradestation/README.md",
+    "services/bot/adapters/tradestation/tests/__init__.py",
+    "services/bot/adapters/tradestation/tests/test_tradestation.py"
+  ]
+}

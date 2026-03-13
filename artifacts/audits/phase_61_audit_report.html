@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 61 — Audit Report</title>
+  <style>body{font-family:system-ui;margin:1rem;}</style>
+</head>
+<body>
+  <h1>Phase 61 — Audit Report</h1>
+  <p><strong>Phase:</strong> 61 — Instrument Registry and Activation Control</p>
+  <ul>
+    <li>DB: uses existing instrument_registry and instrument_activation_log tables.</li>
+    <li>Python: nq_instrument_registry provides service and DTOs; no secrets; imports psycopg only in service (optional for tests).</li>
+    <li>Contracts: API and UI contracts documented; no backend/frontend implemented in this phase.</li>
+  </ul>
+  <p><strong>Status:</strong> OK.</p>
+</body>
+</html>

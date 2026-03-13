@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 61 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} table{border-collapse:collapse;} th,td{border:1px solid #ccc;padding:.25rem .5rem;} th{background:#eee;} .pass{color:green;} .skip{color:orange;}</style>
+</head>
+<body>
+  <h1>Phase 61 — Test Report</h1>
+  <p><strong>Phase:</strong> 61 — Instrument Registry and Activation Control</p>
+  <p><strong>Run:</strong> <code>PYTHONPATH=services/bot python3 -m unittest nq_instrument_registry.tests.test_instrument_registry -v</code></p>
+  <table>
+    <thead><tr><th>Test</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>TestInstrumentRecord.test_to_api</td><td class="pass">PASS</td></tr>
+      <tr><td>TestActivationLogEntry.test_to_api</td><td class="pass">PASS</td></tr>
+      <tr><td>TestInstrumentRegistryService.test_list_instruments_returns_list</td><td class="skip">SKIP (psycopg not installed)</td></tr>
+    </tbody>
+  </table>
+  <p><strong>Result:</strong> 2 passed, 1 skipped.</p>
+</body>
+</html>

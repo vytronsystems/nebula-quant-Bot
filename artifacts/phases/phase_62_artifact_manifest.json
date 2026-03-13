@@ -1,0 +1,14 @@
+{
+  "phase": 62,
+  "title": "Binance Account Sync and Venue State Persistence",
+  "artifacts": [
+    "artifacts/phases/phase_62_result.md",
+    "artifacts/tests/phase_62_test_report.html",
+    "artifacts/audits/phase_62_audit_report.html",
+    "artifacts/phases/phase_62_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "services/bot/adapters/binance/account_sync.py",
+    "services/bot/adapters/binance/tests/test_account_sync.py"
+  ]
+}

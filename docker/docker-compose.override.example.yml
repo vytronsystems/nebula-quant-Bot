@@ -1,0 +1,27 @@
+# Example override to run control-plane and web with the stack.
+# Copy to docker-compose.override.yml and adjust as needed.
+# Requires: Java 21 image for control-plane; Node build for web.
+
+# services:
+#   control-plane:
+#     build:
+#       context: ../services/control-plane
+#     container_name: nq-control-plane
+#     ports:
+#       - "8081:8081"
+#     environment:
+#       SPRING_PROFILES_ACTIVE: docker
+#     depends_on:
+#       postgres:
+#         condition: service_healthy
+#     networks: [nqnet]
+#
+#   web:
+#     build:
+#       context: ../apps/web
+#     container_name: nq-web
+#     ports:
+#       - "3001:3000"
+#     depends_on:
+#       - control-plane
+#     networks: [nqnet]

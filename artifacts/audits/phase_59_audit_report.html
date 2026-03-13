@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 59 — Security Audit Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} table{border-collapse:collapse;} th,td{border:1px solid #ccc;padding:.25rem .5rem;} th{background:#eee;} .pass{color:green;} .fail{color:red;}</style>
+</head>
+<body>
+  <h1>Phase 59 — Security Audit Report</h1>
+  <p><strong>Phase:</strong> 59 — Security Cleanup and Packaging Stabilization</p>
+  <h2>Findings</h2>
+  <ul>
+    <li><strong>Hardcoded secrets removed:</strong> Telegram bot token and chat_id removed from <code>docker/alertmanager/alertmanager.yml</code>. Default receiver set to <code>null</code>. Telegram enabled only via env and <code>nq-alertmanager-telegram-enable.sh</code>.</li>
+    <li><strong>Docker Compose:</strong> Postgres, Grafana, postgres-exporter, and bot now use environment variable substitution; no hardcoded passwords in active <code>docker-compose.yml</code>.</li>
+    <li><strong>.env.example:</strong> Added at repo root and <code>docker/</code>. Documents POSTGRES_*, GRAFANA_*, TELEGRAM_*.</li>
+    <li><strong>Secret validation:</strong> <code>scripts/check_secrets.py</code> added; run from repo root to fail on hardcoded secret patterns. Backup files excluded.</li>
+  </ul>
+  <h2>Verification</h2>
+  <p><code>python3 scripts/check_secrets.py</code> — OK (no hardcoded secret patterns in tracked non-backup files).</p>
+  <h2>Recommendations</h2>
+  <ul>
+    <li>Add <code>python3 scripts/check_secrets.py</code> to CI or pre-commit.</li>
+    <li>For production, do not rely on default passwords; set POSTGRES_PASSWORD and GRAFANA_ADMIN_PASSWORD via env or secrets manager.</li>
+  </ul>
+</body>
+</html>
