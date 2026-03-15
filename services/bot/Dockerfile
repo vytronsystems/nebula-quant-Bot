@@ -10,11 +10,9 @@ WORKDIR /app
 # deps mínimas (curl para debug)
 RUN apt-get update && apt-get install -y --no-install-recommends curl && rm -rf /var/lib/apt/lists/*
 
-# 1) requirements + wheelhouse para instalación OFFLINE (evita timeouts de PyPI)
+# 1) requirements — install from PyPI (wheelhouse optional; use when present for offline)
 COPY requirements.txt .
-COPY wheelhouse/ /wheels/
-
-RUN pip install --no-index --find-links=/wheels -r requirements.txt
+RUN pip install -r requirements.txt
 
 # 2) código
 COPY . .
