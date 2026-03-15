@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>CI/CD Pipeline Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>CI/CD Pipeline Audit</h1>
+  <p><strong>File:</strong> .github/workflows/ci.yml</p>
+  <h2>Jobs</h2>
+  <ul>
+    <li class="ok">secrets-check: runs scripts/check_secrets.py.</li>
+    <li class="ok">test: setup Python, pip install bot deps, pytest services/bot.</li>
+    <li class="ok">artifact-validation: checks phase_execution_log.jsonl and phase result files exist.</li>
+  </ul>
+  <p>Triggers: push and pull_request to main/master.</p>
+  <p><strong>Result:</strong> PASS — pipeline exists and validates tests, artifacts, secret scanning.</p>
+</body>
+</html>

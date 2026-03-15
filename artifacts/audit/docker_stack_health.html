@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Docker Stack Health</title>
+  <style>body{font-family:system-ui;margin:1rem;} table{border-collapse:collapse;} th,td{border:1px solid #333;padding:6px;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Docker Infrastructure Audit</h1>
+  <p><strong>Compose file:</strong> docker/docker-compose.yml</p>
+  <h2>Services defined</h2>
+  <table>
+    <tr><th>Service</th><th>Container</th><th>Port(s)</th><th>Restart</th><th>Healthcheck</th></tr>
+    <tr><td>postgres</td><td>nq-postgres</td><td>5432</td><td>unless-stopped</td><td class="ok">pg_isready</td></tr>
+    <tr><td>redis</td><td>nq-redis</td><td>6379</td><td>unless-stopped</td><td class="ok">redis-cli ping</td></tr>
+    <tr><td>grafana</td><td>nq-grafana</td><td>3000</td><td>unless-stopped</td><td class="ok">api/health</td></tr>
+    <tr><td>postgres-exporter</td><td>nq-postgres-exporter</td><td>9187</td><td>unless-stopped</td><td class="ok">metrics</td></tr>
+    <tr><td>bot</td><td>nq-bot</td><td>8080</td><td>unless-stopped</td><td class="ok">pg+redis</td></tr>
+    <tr><td>prometheus</td><td>nq-prometheus</td><td>9090</td><td>unless-stopped</td><td>—</td></tr>
+    <tr><td>alertmanager</td><td>nq-alertmanager</td><td>9093</td><td>unless-stopped</td><td>—</td></tr>
+    <tr><td>binance-api</td><td>nq-binance-api</td><td>8082</td><td>unless-stopped</td><td>—</td></tr>
+    <tr><td>control-plane</td><td>nq-control-plane</td><td>8081</td><td>unless-stopped</td><td>—</td></tr>
+    <tr><td>web-ui</td><td>nq-web-ui</td><td>3001→3000</td><td>default</td><td>—</td></tr>
+  </table>
+  <p>No port conflicts in definition; restart policy consistent. Run <code>docker compose -f docker/docker-compose.yml ps</code> to verify running state.</p>
+  <p><strong>Result:</strong> PASS — stack definition valid; healthchecks present for postgres, redis, grafana, bot, postgres-exporter.</p>
+</body>
+</html>

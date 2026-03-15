@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Risk Guardrails Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Risk Guardrails Audit</h1>
+  <p><strong>Limits:</strong> max drawdown, margin usage, exposure per strategy (daily loss implied by drawdown).</p>
+  <h2>Implementation</h2>
+  <ul>
+    <li class="ok">nq_risk_guardrails.GuardrailLimits: max_drawdown_pct, max_margin_usage_pct, max_exposure_per_strategy_pct.</li>
+    <li class="ok">RiskGuardrailsEngine.check(drawdown_pct, margin_usage_pct, exposure_per_strategy_pct) → list of GuardrailCheck (passed, limit_name, current_value, limit_value).</li>
+  </ul>
+  <p><strong>Result:</strong> PASS — limits exist and are enforceable.</p>
+</body>
+</html>

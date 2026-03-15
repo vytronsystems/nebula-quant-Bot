@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Metrics Engine Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Metrics Engine Audit</h1>
+  <p><strong>Computed metrics:</strong> WinRate, PnL, trade count, days observed, drawdown, profit factor.</p>
+  <h2>Implementation</h2>
+  <ul>
+    <li class="ok">nq_metrics.MetricsEngine: win_rate, profit_factor, max_drawdown, total_trades, equity_curve.</li>
+    <li class="ok">strategy_metrics table (migration 005): deployment_id, win_rate, pnl, trades_count, days_count, profit_factor, max_drawdown.</li>
+    <li class="ok">strategy_metrics_job.py: computes from trades and upserts per deployment.</li>
+    <li class="ok">GET /api/metrics, /api/metrics/by-deployment/{id}.</li>
+  </ul>
+  <p><strong>Result:</strong> PASS — metrics calculations and persistence validated.</p>
+</body>
+</html>

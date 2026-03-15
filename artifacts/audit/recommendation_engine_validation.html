@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Recommendation Engine Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Recommendation Engine Audit</h1>
+  <p><strong>States:</strong> Ready for Live, Requires More Data, Keep in Paper, Degraded, Rejected.</p>
+  <h2>Implementation</h2>
+  <ul>
+    <li class="ok">nq_recommendation.RecommendationEngine.recommend() — returns RecommendedState and reason.</li>
+    <li class="ok">Thresholds: MIN_WIN_RATE_LIVE, MIN_PROFIT_FACTOR_LIVE, MIN_TRADES_LIVE, MIN_DAYS_LIVE, MAX_DRAWDOWN_LIVE.</li>
+    <li class="ok">Control plane GET /api/recommendations — list by deployment with currentStage, recommendedState, reason.</li>
+  </ul>
+  <p><strong>Result:</strong> PASS — recommendation states and rule thresholds validated.</p>
+</body>
+</html>

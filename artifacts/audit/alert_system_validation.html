@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Alert System Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;} .warn{color:orange;}</style>
+</head>
+<body>
+  <h1>Alert System Audit</h1>
+  <p><strong>Channels:</strong> dashboard, Telegram, email. Triggers: degradation, system failure, risk breach.</p>
+  <h2>Implementation</h2>
+  <ul>
+    <li class="ok">alerts table (migration 006): channel, severity, title, body, trigger_type.</li>
+    <li class="ok">GET /api/alerts, POST /api/alerts — dashboard channel implemented.</li>
+    <li class="warn">Telegram and email: routing stubs or external config; not implemented in-code in this audit.</li>
+  </ul>
+  <p>Trigger simulation: POST to /api/alerts with trigger_type and severity to verify persistence.</p>
+  <p><strong>Result:</strong> PASS for dashboard; Telegram/email require external configuration.</p>
+</body>
+</html>

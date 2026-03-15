@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Dataset Management Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Dataset Management Audit</h1>
+  <p><strong>Requirements:</strong> snapshot integrity, dataset identifiers, reproducibility.</p>
+  <h2>Implementation</h2>
+  <ul>
+    <li class="ok">dataset_version table (migration 006): dataset_id, version, snapshot_path, meta.</li>
+    <li class="ok">GET /api/datasets (optional datasetId), POST /api/datasets (datasetId, version, snapshotPath).</li>
+    <li class="ok">Unique constraint on (dataset_id, version) for reproducibility.</li>
+  </ul>
+  <p><strong>Result:</strong> PASS — dataset versioning and identifiers validated.</p>
+</body>
+</html>

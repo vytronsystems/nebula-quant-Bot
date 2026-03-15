@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Promotion Workflow Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Promotion Workflow Audit</h1>
+  <p><strong>Approval pipeline:</strong> Promotion Queue UI → PATCH deployment stage + POST promotion_review (audit trail).</p>
+  <h2>UI</h2>
+  <ul>
+    <li class="ok">Route /operator/promotion-queue — table with WinRate, PnL, Trades, Days; actions per row.</li>
+    <li class="ok">Buttons: Promote to Live, Move to Paper, Move to Backtest.</li>
+  </ul>
+  <h2>Backend</h2>
+  <ul>
+    <li class="ok">PATCH /api/deployments/{id} — update stage.</li>
+    <li class="ok">POST /api/promotion-review — strategyId, fromStage, toStage, decision (audit log).</li>
+    <li class="ok">Table promotion_review (migration 003).</li>
+  </ul>
+  <p><strong>Result:</strong> PASS — promotion queue, approval logging, and state transitions validated.</p>
+</body>
+</html>

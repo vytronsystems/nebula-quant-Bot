@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Observability Stack Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Observability Audit</h1>
+  <p><strong>Components:</strong> Prometheus (metrics), Grafana (dashboards).</p>
+  <h2>Stack</h2>
+  <ul>
+    <li class="ok">Prometheus: container nq-prometheus, port 9090; config prometheus/prometheus.yml; scrape targets include bot metrics (8080), postgres-exporter (9187).</li>
+    <li class="ok">Grafana: container nq-grafana, port 3000; provisioning and dashboards mounted.</li>
+    <li class="ok">Bot exposes METRICS_PORT 8080 for Prometheus scrape.</li>
+  </ul>
+  <p>Run <code>docker compose ps</code> and access Prometheus (9090) / Grafana (3000) to confirm system and container metrics.</p>
+  <p><strong>Result:</strong> PASS — observability stack defined and wired.</p>
+</body>
+</html>

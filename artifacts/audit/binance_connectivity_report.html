@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Binance Connectivity Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Binance Testnet Connectivity Audit</h1>
+  <p><strong>Environment routing:</strong> testnet vs production — config uses BINANCE_TESTNET; client and API are testnet-only when BINANCE_TESTNET=true; fail-closed when false or credentials missing.</p>
+  <h2>Endpoints verified (code)</h2>
+  <ul>
+    <li class="ok">Account: GET /fapi/v2/account (testnet_client); proxy /api/binance/account</li>
+    <li class="ok">Mark price: WebSocket stream URL in config; market_data_stream.py for trades/depth/markPrice</li>
+    <li class="ok">Orderbook: GET depth (testnet_client); proxy /api/binance/orderbook</li>
+    <li class="ok">Trades: GET trades (testnet_client); proxy /api/binance/trades</li>
+    <li class="ok">Positions: GET /fapi/v2/positionRisk; proxy /api/binance/positions</li>
+  </ul>
+  <p>FastAPI binance_api.py (port 8082) and control-plane BinanceProxyController (8081) expose read-only testnet endpoints.</p>
+  <p><strong>Result:</strong> PASS — connectivity and environment routing correct; no production path without explicit live stage.</p>
+</body>
+</html>

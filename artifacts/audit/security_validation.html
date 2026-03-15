@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Security Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Security Audit</h1>
+  <p><strong>Checks:</strong> scripts/check_secrets.py; no exposed credentials; dependency safety; env isolation.</p>
+  <h2>Secret scan</h2>
+  <ul>
+    <li class="ok">scripts/check_secrets.py executed — no hardcoded secret patterns found (exit 0).</li>
+    <li class="ok">Patterns scanned: bot_token, chat_id, POSTGRES_PASSWORD, api_key literals; excludes .git, node_modules, __pycache__, .venv, artifacts.</li>
+  </ul>
+  <h2>Environment</h2>
+  <p>Credentials and URLs supplied via environment (BINANCE_*, POSTGRES_*, etc.); .env in .gitignore.</p>
+  <p><strong>Result:</strong> PASS — no exposed credentials; env variable isolation in use.</p>
+</body>
+</html>

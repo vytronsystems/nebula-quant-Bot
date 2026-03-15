@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Execution Routing Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Execution Routing Audit</h1>
+  <p><strong>Safety:</strong> paper → simulated / testnet; live → production credentials; fail-closed.</p>
+  <h2>Implementation</h2>
+  <ul>
+    <li class="ok">nq_exec.live_routing.route_by_stage(stage) — returns RoutingDecision (use_production, use_testnet, use_paper).</li>
+    <li class="ok">select_adapter_key(stage): "production" only when stage=="live"; otherwise "paper" or "testnet".</li>
+    <li class="ok">Missing/unknown stage → use_production=false (fail-closed).</li>
+  </ul>
+  <p><strong>Result:</strong> PASS — routing safety and fail-closed behavior validated.</p>
+</body>
+</html>

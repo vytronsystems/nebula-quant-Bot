@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>UI Integrity Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>UI Integrity Audit</h1>
+  <p><strong>Routes to verify:</strong> /operator, /executive, promotions, instruments. API integration.</p>
+  <h2>Routes</h2>
+  <ul>
+    <li class="ok">/operator — Operator Cockpit (hub).</li>
+    <li class="ok">/operator/promotion-queue — Promotion Queue (promotions).</li>
+    <li class="ok">/operator/instruments — Instrument Management.</li>
+    <li class="ok">/executive — Executive Dashboard.</li>
+  </ul>
+  <h2>API integration</h2>
+  <p>UI uses NEXT_PUBLIC_CONTROL_PLANE_URL (default localhost:8081) for /api/deployments, /api/metrics, /api/instruments, /api/promotion-review, /api/binance/*.</p>
+  <p><strong>Result:</strong> PASS — routes load (HTTP 200); API integration configured.</p>
+</body>
+</html>

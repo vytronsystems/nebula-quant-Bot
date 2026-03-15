@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Reconciliation Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Reconciliation Engine Audit</h1>
+  <p><strong>Purpose:</strong> Detect divergence between exchange state and internal state (orders, positions, balances).</p>
+  <h2>Implementation</h2>
+  <ul>
+    <li class="ok">nq_reconciliation: OrderReconciliationModule, PositionReconciliationModule, PnLReconciliationModule.</li>
+    <li class="ok">runner.run_reconciliation(venue, internal_orders, venue_orders, internal_positions, venue_positions, internal_pnl, venue_pnl, on_alert).</li>
+    <li class="ok">on_alert(reason, payload) invoked on order_divergence, position_divergence, pnl_divergence.</li>
+  </ul>
+  <p><strong>Result:</strong> PASS — reconciliation detects and reports divergence.</p>
+</body>
+</html>

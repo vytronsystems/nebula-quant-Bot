@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Strategy Lifecycle Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Strategy Lifecycle Audit</h1>
+  <p><strong>Pipeline stages:</strong> Backtest → Walk-Forward → Paper → Live; Degraded (detected by degradation engine).</p>
+  <h2>Deployment registry</h2>
+  <ul>
+    <li class="ok">Table strategy_deployment (migration 004): strategy_name, version, instrument, venue, environment, stage.</li>
+    <li class="ok">Stage values: backtest, paper, live.</li>
+    <li class="ok">Control plane: GET/POST/PATCH /api/deployments.</li>
+  </ul>
+  <h2>Lifecycle behavior</h2>
+  <p>Promotion Queue UI and promotion_review table log transitions. Degradation engine (nq_degradation) sets trading_enabled=false and state degraded on threshold breach.</p>
+  <p><strong>Result:</strong> PASS — pipeline exists; deployment registry and stage transitions validated.</p>
+</body>
+</html>

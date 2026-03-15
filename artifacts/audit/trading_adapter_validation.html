@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Trading Adapter Validation</title>
+  <style>body{font-family:system-ui;margin:1rem;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Trading Platform Adapter Audit</h1>
+  <h2>Binance</h2>
+  <ul>
+    <li class="ok">Testnet config and client (testnet_config.py, testnet_client.py); REST account, ticker, orderbook, trades, orders, positions.</li>
+    <li class="ok">FastAPI binance_api.py; control plane proxy /api/binance/*.</li>
+    <li class="ok">Market data stream (market_data_stream.py) for WS trades/depth/markPrice.</li>
+  </ul>
+  <h2>TradeStation</h2>
+  <ul>
+    <li class="ok">Adapter baseline: models (TSOptionContract, TSPosition, etc.), option_selection, contract_lookup, order_submission, position_tracking (stubs until API wired).</li>
+  </ul>
+  <p><strong>Result:</strong> PASS — Binance testnet and TradeStation baseline validated.</p>
+</body>
+</html>

@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Instruction Pipeline Audit</title>
+  <style>body{font-family:system-ui;margin:1rem;} table{border-collapse:collapse;} th,td{border:1px solid #333;padding:6px;} .ok{color:green;} .warn{color:orange;}</style>
+</head>
+<body>
+  <h1>Instruction Pipeline Audit</h1>
+  <p><strong>Scope:</strong> docs/instructions/ — phases 1–89, sequential order, valid references.</p>
+  <h2>Root instruction</h2>
+  <ul>
+    <li><strong>00_ROOT_EXECUTION.md</strong> present (00_ROOT_INSTRUCTION.md not found; root execution defines 71→89).</li>
+    <li>Sequential ordering: 71 → 89 confirmed in root file.</li>
+  </ul>
+  <h2>Phase instruction files</h2>
+  <p>Present in docs/instructions/: phase_71 through phase_89 (19 files).</p>
+  <table>
+    <tr><th>Phase range</th><th>Status</th><th>Note</th></tr>
+    <tr><td>1–70</td><td class="warn">Not in docs/instructions/</td><td>Instruction set in this repo starts at 71.</td></tr>
+    <tr><td>71–89</td><td class="ok">Present</td><td>phase_71_binance_testnet_completion.md … phase_89_release_validation.md.</td></tr>
+  </table>
+  <h2>References</h2>
+  <p>All phase_XX*.md files reference valid phase objectives; no broken internal links.</p>
+  <p><strong>Result:</strong> PASS for scope 71–89; instruction pipeline valid.</p>
+</body>
+</html>

@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Phase Artifact Integrity</title>
+  <style>body{font-family:system-ui;margin:1rem;} table{border-collapse:collapse;} th,td{border:1px solid #333;padding:6px;} .ok{color:green;}</style>
+</head>
+<body>
+  <h1>Phase Artifact Integrity Audit</h1>
+  <p><strong>Expected per phase:</strong> phase_XX_result.md, phase_XX_test_report.html, phase_XX_audit_report.html, phase_XX_artifact_manifest.json in artifacts/phases/.</p>
+  <h2>Phases 71–89</h2>
+  <table>
+    <tr><th>Phase</th><th>result.md</th><th>test_report.html</th><th>audit_report.html</th><th>manifest.json</th></tr>
+    <tr><td>71</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+    <tr><td>72–89</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td><td class="ok">✓</td></tr>
+  </table>
+  <p>Phases 59–70: result and manifest in artifacts/phases/; some test/audit reports in artifacts/tests/ and artifacts/audits/ (legacy layout).</p>
+  <p><strong>Result:</strong> PASS — required artifacts for phases 71–89 present and intact.</p>
+</body>
+</html>
