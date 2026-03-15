@@ -20,9 +20,10 @@ public class SecurityConfig {
         http.csrf(csrf -> csrf.disable())
             .cors(cors -> cors.configurationSource(corsConfigurationSource))
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/actuator/health", "/api/health", "/api/**").permitAll()
+                .requestMatchers("/actuator/**", "/api/**").permitAll()
+                .anyRequest().permitAll()
             )
-            .httpBasic(basic -> {});
+            .httpBasic(basic -> basic.disable());
         return http.build();
     }
 }

@@ -16,14 +16,39 @@ type InstrumentRecord = {
 
 const CONTROL_PLANE_URL = process.env.NEXT_PUBLIC_CONTROL_PLANE_URL || "http://localhost:8081";
 
+const DEFAULT_VENUES = ["Binance", "TradeStation"];
+
+const ASSET_TYPES = ["spot", "futures", "options", "cfd"];
+
+function assetTypeForVenue(venue: string): string {
+  if (venue === "Binance") return "futures";
+  if (venue === "TradeStation") return "options";
+  return "spot";
+}
+
 export default function InstrumentsControlPage() {
   const [instruments, setInstruments] = useState<InstrumentRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [venues, setVenues] = useState<string[]>(DEFAULT_VENUES);
   const [addVenue, setAddVenue] = useState("");
   const [addSymbol, setAddSymbol] = useState("");
   const [addBusy, setAddBusy] = useState(false);
   const [toggleBusy, setToggleBusy] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editSymbol, setEditSymbol] = useState("");
+  const [editAssetType, setEditAssetType] = useState("");
+  const [editBusy, setEditBusy] = useState(false);
+  const [deleteBusy, setDeleteBusy] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/venues.json")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (Array.isArray(data) && data.length > 0) setVenues(data);
+      })
+      .catch(() => {});
+  }, []);
 
   async function refetch() {
     try {
@@ -42,7 +67,12 @@ export default function InstrumentsControlPage() {
       const res = await fetch(`${CONTROL_PLANE_URL}/api/instruments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ venue: addVenue.trim(), symbol: addSymbol.trim(), assetType: "spot", active: true }),
+        body: JSON.stringify({
+          venue: addVenue.trim(),
+          symbol: addSymbol.trim(),
+          assetType: assetTypeForVenue(addVenue.trim()),
+          active: true,
+        }),
       });
       if (res.ok) {
         setAddVenue("");
@@ -65,6 +95,55 @@ export default function InstrumentsControlPage() {
       if (res.ok) await refetch();
     } finally {
       setToggleBusy(null);
+    }
+  }
+
+  function startEdit(row: InstrumentRecord) {
+    const id = instrumentId(row);
+    if (!row.id) return;
+    setEditingId(id);
+    setEditSymbol(row.symbol);
+    setEditAssetType(row.assetType || "spot");
+  }
+
+  function cancelEdit() {
+    setEditingId(null);
+    setEditSymbol("");
+    setEditAssetType("");
+  }
+
+  async function saveEdit() {
+    if (!editingId || !editSymbol.trim()) return;
+    setEditBusy(true);
+    try {
+      const res = await fetch(`${CONTROL_PLANE_URL}/api/instruments/${editingId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ symbol: editSymbol.trim(), assetType: editAssetType || "spot" }),
+      });
+      if (res.ok) {
+        cancelEdit();
+        await refetch();
+      }
+    } finally {
+      setEditBusy(false);
+    }
+  }
+
+  async function deleteInstrument(row: InstrumentRecord) {
+    const id = row.id;
+    if (!id) return;
+    if (!confirm(`¿Eliminar instrumento ${row.venue} / ${row.symbol}?`)) return;
+    setDeleteBusy(id);
+    try {
+      const res = await fetch(`${CONTROL_PLANE_URL}/api/instruments/${id}`, { method: "DELETE" });
+      if (res.ok || res.status === 204) {
+        if (editingId === id) cancelEdit();
+        setInstruments((prev) => prev.filter((instr) => (instr.id ?? instrumentId(instr)) !== id));
+        refetch().catch(() => {});
+      }
+    } finally {
+      setDeleteBusy(null);
     }
   }
 
@@ -116,71 +195,149 @@ export default function InstrumentsControlPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <Card>
-        <CardHeader><CardTitle>Instruments Control</CardTitle></CardHeader>
-        <CardContent>
-          <div className="flex flex-wrap gap-2 mb-4">
-            <input
-              type="text"
-              placeholder="Venue"
+    <div className="min-w-0 w-full max-w-full space-y-4 p-2 sm:p-4">
+      <Card className="min-w-0 overflow-hidden">
+        <CardHeader className="p-3 sm:p-6">
+          <CardTitle className="text-base sm:text-lg">Instruments Control</CardTitle>
+        </CardHeader>
+        <CardContent className="p-3 sm:p-6 pt-0">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-4">
+            <select
               value={addVenue}
               onChange={(e) => setAddVenue(e.target.value)}
-              className="rounded border border-nebula-cyan/30 bg-background px-2 py-1 text-sm w-24"
-            />
+              className="rounded border border-nebula-cyan/30 bg-background px-2 py-1.5 text-sm min-w-0 w-full sm:w-auto sm:min-w-[140px]"
+            >
+              <option value="">Seleccionar venue</option>
+              {venues.map((v) => (
+                <option key={v} value={v}>{v}</option>
+              ))}
+            </select>
             <input
               type="text"
               placeholder="Symbol"
               value={addSymbol}
               onChange={(e) => setAddSymbol(e.target.value)}
-              className="rounded border border-nebula-cyan/30 bg-background px-2 py-1 text-sm w-28"
+              className="rounded border border-nebula-cyan/30 bg-background px-2 py-1.5 text-sm min-w-0 w-full sm:w-28 flex-1 sm:flex-none"
             />
             <button
               type="button"
               disabled={addBusy || !addVenue.trim() || !addSymbol.trim()}
               onClick={addInstrument}
-              className="rounded bg-nebula-cyan/20 px-3 py-1 text-sm hover:bg-nebula-cyan/30 disabled:opacity-50"
+              className="rounded bg-nebula-cyan/20 px-3 py-1.5 text-sm hover:bg-nebula-cyan/30 disabled:opacity-50 shrink-0"
             >
-              Add instrument
+              Añadir instrumento
             </button>
           </div>
+          <p className="text-xs text-gray-400 mb-3">Binance: futures. TradeStation: options.</p>
           {instruments.length === 0 ? (
-            <p className="text-sm text-gray-400">No instruments in the registry. Add them above or via the API.</p>
+            <p className="text-sm text-gray-400">No hay instrumentos. Añade alguno arriba o vía API.</p>
           ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm border-collapse border border-nebula-cyan/30">
+            <div className="min-w-0 overflow-x-auto -mx-1 sm:mx-0">
+              <table className="w-full min-w-[640px] text-sm border-collapse border border-nebula-cyan/30">
                 <thead>
                   <tr className="bg-nebula-cyan/10">
-                    <th className="border border-nebula-cyan/30 px-3 py-2 text-left">Venue</th>
-                    <th className="border border-nebula-cyan/30 px-3 py-2 text-left">Symbol</th>
-                    <th className="border border-nebula-cyan/30 px-3 py-2 text-left">Asset type</th>
-                    <th className="border border-nebula-cyan/30 px-3 py-2 text-left">Active</th>
-                    <th className="border border-nebula-cyan/30 px-3 py-2 text-left">Updated</th>
-                    <th className="border border-nebula-cyan/30 px-3 py-2 text-left">Actions</th>
+                    <th className="border border-nebula-cyan/30 px-2 sm:px-3 py-2 text-left">Venue</th>
+                    <th className="border border-nebula-cyan/30 px-2 sm:px-3 py-2 text-left">Symbol</th>
+                    <th className="border border-nebula-cyan/30 px-2 sm:px-3 py-2 text-left">Asset type</th>
+                    <th className="border border-nebula-cyan/30 px-2 sm:px-3 py-2 text-left">Active</th>
+                    <th className="border border-nebula-cyan/30 px-2 sm:px-3 py-2 text-left hidden sm:table-cell">Updated</th>
+                    <th className="border border-nebula-cyan/30 px-2 sm:px-3 py-2 text-left">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {instruments.map((row, i) => (
-                    <tr key={instrumentId(row)} className="border-b border-nebula-cyan/20">
-                      <td className="border border-nebula-cyan/20 px-3 py-2">{row.venue}</td>
-                      <td className="border border-nebula-cyan/20 px-3 py-2 font-mono">{row.symbol}</td>
-                      <td className="border border-nebula-cyan/20 px-3 py-2">{row.assetType}</td>
-                      <td className="border border-nebula-cyan/20 px-3 py-2">{row.active ? "Yes" : "No"}</td>
-                      <td className="border border-nebula-cyan/20 px-3 py-2 text-gray-400">{row.updatedAt ?? "—"}</td>
-                      <td className="border border-nebula-cyan/20 px-3 py-2">
-                        {row.id && (
-                          <button
-                            type="button"
-                            disabled={toggleBusy === row.id}
-                            onClick={() => toggleActive(row.id!, !row.active)}
-                            className="rounded bg-nebula-cyan/20 px-2 py-1 text-xs hover:bg-nebula-cyan/30 disabled:opacity-50"
-                          >
-                            {row.active ? "Deactivate" : "Activate"}
-                          </button>
+                  {instruments.map((row) => {
+                    const id = instrumentId(row);
+                    const isEditing = editingId === id;
+                    return (
+                      <tr key={id} className="border-b border-nebula-cyan/20">
+                        <td className="border border-nebula-cyan/20 px-2 sm:px-3 py-2">{row.venue}</td>
+                        {isEditing ? (
+                          <>
+                            <td className="border border-nebula-cyan/20 px-2 sm:px-3 py-2">
+                              <input
+                                type="text"
+                                value={editSymbol}
+                                onChange={(e) => setEditSymbol(e.target.value)}
+                                className="rounded border border-nebula-cyan/30 bg-background px-2 py-1 text-sm w-full min-w-0 font-mono"
+                              />
+                            </td>
+                            <td className="border border-nebula-cyan/20 px-2 sm:px-3 py-2">
+                              <select
+                                value={editAssetType}
+                                onChange={(e) => setEditAssetType(e.target.value)}
+                                className="rounded border border-nebula-cyan/30 bg-background px-2 py-1 text-sm w-full min-w-0"
+                              >
+                                {ASSET_TYPES.map((t) => (
+                                  <option key={t} value={t}>{t}</option>
+                                ))}
+                              </select>
+                            </td>
+                          </>
+                        ) : (
+                          <>
+                            <td className="border border-nebula-cyan/20 px-2 sm:px-3 py-2 font-mono">{row.symbol}</td>
+                            <td className="border border-nebula-cyan/20 px-2 sm:px-3 py-2">{row.assetType}</td>
+                          </>
                         )}
-                      </td>
-                    </tr>
-                  ))}
+                        <td className="border border-nebula-cyan/20 px-2 sm:px-3 py-2">{row.active ? "Sí" : "No"}</td>
+                        <td className="border border-nebula-cyan/20 px-2 sm:px-3 py-2 text-gray-400 hidden sm:table-cell">{row.updatedAt ?? "—"}</td>
+                        <td className="border border-nebula-cyan/20 px-2 sm:px-3 py-2">
+                          <div className="flex flex-wrap gap-1">
+                            {isEditing ? (
+                              <>
+                                <button
+                                  type="button"
+                                  disabled={editBusy}
+                                  onClick={saveEdit}
+                                  className="rounded bg-nebula-cyan/20 px-2 py-1 text-xs hover:bg-nebula-cyan/30 disabled:opacity-50"
+                                >
+                                  Guardar
+                                </button>
+                                <button
+                                  type="button"
+                                  disabled={editBusy}
+                                  onClick={cancelEdit}
+                                  className="rounded border border-nebula-cyan/30 px-2 py-1 text-xs hover:bg-nebula-cyan/10 disabled:opacity-50"
+                                >
+                                  Cancelar
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                {row.id && (
+                                  <>
+                                    <button
+                                      type="button"
+                                      onClick={() => startEdit(row)}
+                                      className="rounded border border-nebula-cyan/30 px-2 py-1 text-xs hover:bg-nebula-cyan/10"
+                                    >
+                                      Editar
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={toggleBusy === row.id}
+                                      onClick={() => toggleActive(row.id!, !row.active)}
+                                      className="rounded bg-nebula-cyan/20 px-2 py-1 text-xs hover:bg-nebula-cyan/30 disabled:opacity-50"
+                                    >
+                                      {row.active ? "Desactivar" : "Activar"}
+                                    </button>
+                                    <button
+                                      type="button"
+                                      disabled={deleteBusy === row.id}
+                                      onClick={() => deleteInstrument(row)}
+                                      className="rounded bg-red-500/20 px-2 py-1 text-xs hover:bg-red-500/30 text-red-300 disabled:opacity-50"
+                                    >
+                                      Borrar
+                                    </button>
+                                  </>
+                                )}
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

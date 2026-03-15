@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 90 — Functional System Validation — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} .pass{color:green;} .warn{color:orange;} .skip{color:gray;}</style>
+</head>
+<body>
+  <h1>Phase 90 — Functional System Validation — Test Report</h1>
+  <p><strong>Phase:</strong> 90 — Binance Futures Testnet with BTCUSDT</p>
+  <h2>Instrument Registration</h2>
+  <ul>
+    <li class="pass">BTCUSDT created via POST /api/instruments (venue=Binance, assetType=futures)</li>
+    <li class="pass">BTCUSDT visible in GET /api/instruments?activeOnly=false</li>
+  </ul>
+  <h2>Deployment Creation</h2>
+  <ul>
+    <li class="pass">Paper deployment created via POST /api/deployments</li>
+    <li class="pass">stage=paper, environment=testnet, instrument=BTCUSDT, venue=Binance</li>
+    <li class="pass">meta.paper_run_days=15, enabled=true</li>
+  </ul>
+  <h2>Binance Account Connectivity</h2>
+  <ul>
+    <li class="warn">Status NOT_CONFIGURED — BINANCE_API_KEY/BINANCE_API_SECRET missing (expected without credentials)</li>
+    <li class="pass">API returns clear degraded status, no crash</li>
+  </ul>
+  <h2>Market Data / Order Book / Trades</h2>
+  <ul>
+    <li class="skip">Requires Binance credentials — returns NOT_CONFIGURED</li>
+  </ul>
+  <h2>Endpoint Responses</h2>
+  <ul>
+    <li class="pass">GET /api/instruments — 200</li>
+    <li class="pass">GET /api/deployments — 200</li>
+    <li class="pass">GET /api/dashboard — 200</li>
+    <li class="pass">GET /api/metrics — 200</li>
+    <li class="pass">GET /api/recommendations — 200</li>
+    <li class="pass">GET /api/alerts — 200</li>
+    <li class="pass">GET /api/binance/health — 200</li>
+    <li class="pass">GET /api/binance/account, /market, /orderbook, /trades, /orders, /positions — 200 (NOT_CONFIGURED body)</li>
+  </ul>
+  <h2>UI Route Availability</h2>
+  <ul>
+    <li class="pass">/operator — 200</li>
+    <li class="pass">/operator/instruments — 200</li>
+    <li class="pass">/executive — 200</li>
+    <li class="pass">/operator/promotion-queue — 200</li>
+  </ul>
+  <h2>Paper Runner Activation / Configuration</h2>
+  <ul>
+    <li class="pass">Deployment registered with paper_run_days=15</li>
+    <li class="pass">Paper execution path: workflow-triggered (nq_paper, research pipeline)</li>
+    <li class="pass">Persistence tables: paper_trading_daily_snapshot, trades</li>
+  </ul>
+  <h2>Metric Pipeline Availability</h2>
+  <ul>
+    <li class="pass">strategy_metrics_job reads deployments + trades, writes strategy_metrics</li>
+    <li class="pass">GET /api/metrics, /api/metrics/by-deployment/{id} — available</li>
+    <li class="skip">Current metrics empty (no trades yet) — pending accumulation</li>
+  </ul>
+  <p><strong>Result:</strong> PASS (instrument, deployment, API, UI, pipeline validated; Binance live data requires credentials).</p>
+</body>
+</html>

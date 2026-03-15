@@ -6,6 +6,7 @@ import com.nebulaquant.controlplane.repository.InstrumentRegistryRepository;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -58,8 +59,28 @@ public class InstrumentRegistryController {
         InstrumentRegistry e = opt.get();
         if (payload.containsKey("active")) e.setActive(Boolean.TRUE.equals(payload.get("active")));
         if (payload.containsKey("meta")) e.setMeta((Map<String, Object>) payload.get("meta"));
+        if (payload.containsKey("symbol")) {
+            String symbol = optString(payload, "symbol", e.getSymbol());
+            if (!symbol.isBlank()) {
+                Optional<InstrumentRegistry> existing = repository.findByVenueAndSymbol(e.getVenue(), symbol);
+                if (existing.isPresent() && !existing.get().getId().equals(id))
+                    return ResponseEntity.status(HttpStatus.CONFLICT).build();
+                e.setSymbol(symbol);
+            }
+        }
+        if (payload.containsKey("assetType")) {
+            String at = optString(payload, "assetType", "spot");
+            e.setAssetType(at.isBlank() ? "spot" : at);
+        }
         e.setUpdatedAt(Instant.now());
         return ResponseEntity.ok(toDto(repository.save(e)));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(@PathVariable UUID id) {
+        if (repository.findById(id).isEmpty()) return ResponseEntity.notFound().build();
+        repository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

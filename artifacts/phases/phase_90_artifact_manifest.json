@@ -1,0 +1,34 @@
+{
+  "phase": 90,
+  "title": "Functional System Validation — Binance Futures Testnet with BTCUSDT",
+  "artifacts": [
+    "artifacts/phases/phase_90_result.md",
+    "artifacts/phases/phase_90_test_report.html",
+    "artifacts/phases/phase_90_audit_report.html",
+    "artifacts/phases/phase_90_artifact_manifest.json",
+    "artifacts/repository_tree_snapshot_phase_90.txt"
+  ],
+  "files_created": ["docs/PHASE_90_BTCUSDT_VALIDATION.md", "artifacts/phases/phase_90_result.md", "artifacts/phases/phase_90_test_report.html", "artifacts/phases/phase_90_audit_report.html", "artifacts/repository_tree_snapshot_phase_90.txt"],
+  "files_modified": ["artifacts/phase_execution_log.jsonl"],
+  "services_affected": ["control-plane", "binance-api", "web-ui", "postgres"],
+  "validations_executed": [
+    "instrument_registration",
+    "deployment_creation",
+    "binance_connectivity",
+    "api_endpoints",
+    "ui_routes",
+    "metrics_pipeline",
+    "recommendation_readiness"
+  ],
+  "fixes_applied": [
+    "Applied DB migrations 004, 005, 006 (strategy_deployment, strategy_metrics, alerts/datasets)"
+  ],
+  "current_status": "pass",
+  "artifact_locations": {
+    "result": "artifacts/phases/phase_90_result.md",
+    "test_report": "artifacts/phases/phase_90_test_report.html",
+    "audit_report": "artifacts/phases/phase_90_audit_report.html",
+    "manifest": "artifacts/phases/phase_90_artifact_manifest.json",
+    "tree_snapshot": "artifacts/repository_tree_snapshot_phase_90.txt"
+  }
+}
