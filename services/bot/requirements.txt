@@ -3,6 +3,8 @@ requests==2.32.3
 websockets==12.0
 pydantic==2.9.2
 loguru==0.7.2
+fastapi==0.115.5
+uvicorn[standard]==0.32.1
 
 # DB
 psycopg[binary]==3.2.1

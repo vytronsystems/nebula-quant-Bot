@@ -1,0 +1,23 @@
+{
+  "phase": 71,
+  "title": "Binance Testnet Integration",
+  "artifacts": [
+    "artifacts/phases/phase_71_result.md",
+    "artifacts/tests/phase_71_test_report.html",
+    "artifacts/audits/phase_71_audit_report.html",
+    "artifacts/phases/phase_71_artifact_manifest.json"
+  ],
+  "code_changes": [
+    "services/bot/adapters/binance/testnet_config.py",
+    "services/bot/adapters/binance/testnet_client.py",
+    "services/bot/binance_api.py",
+    "services/bot/adapters/binance/tests/test_testnet.py",
+    "services/bot/requirements.txt",
+    "services/bot/Dockerfile.binance-api",
+    "docker/docker-compose.yml",
+    "services/control-plane/src/main/resources/application.yml",
+    "services/control-plane/src/main/java/com/nebulaquant/controlplane/config/BinanceApiConfig.java",
+    "services/control-plane/src/main/java/com/nebulaquant/controlplane/api/BinanceProxyController.java",
+    "docs/BINANCE_TESTNET_INTEGRATION.md"
+  ]
+}

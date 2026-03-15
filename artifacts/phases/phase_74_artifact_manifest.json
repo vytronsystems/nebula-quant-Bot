@@ -1,0 +1,20 @@
+{
+  "phase": 74,
+  "title": "Metrics Engine",
+  "artifacts": [
+    "artifacts/phases/phase_74_result.md",
+    "artifacts/phases/phase_74_test_report.html",
+    "artifacts/phases/phase_74_audit_report.html",
+    "artifacts/phases/phase_74_artifact_manifest.json"
+  ],
+  "files_created": [
+    "docker/db/migrations/005_strategy_metrics.sql",
+    "services/control-plane/src/main/java/com/nebulaquant/controlplane/domain/StrategyMetrics.java",
+    "services/control-plane/src/main/java/com/nebulaquant/controlplane/repository/StrategyMetricsRepository.java",
+    "services/control-plane/src/main/java/com/nebulaquant/controlplane/api/MetricsController.java",
+    "services/bot/nq_metrics/strategy_metrics_job.py"
+  ],
+  "files_modified": [],
+  "services_added": [],
+  "validation_status": "pass"
+}

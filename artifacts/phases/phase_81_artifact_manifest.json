@@ -1,0 +1,1 @@
+{"phase":81,"title":"UI Backend Integration","artifacts":["artifacts/phases/phase_81_result.md","artifacts/phases/phase_81_test_report.html","artifacts/phases/phase_81_audit_report.html","artifacts/phases/phase_81_artifact_manifest.json"],"files_created":["services/control-plane/src/main/java/com/nebulaquant/controlplane/api/DashboardController.java"],"validation_status":"pass"}

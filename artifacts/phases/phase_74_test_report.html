@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 74 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} .pass{color:green;}</style>
+</head>
+<body>
+  <h1>Phase 74 — Test Report</h1>
+  <p><strong>Phase:</strong> 74 — Metrics Engine</p>
+  <ul>
+    <li class="pass">Migration 005: strategy_metrics table and FK to strategy_deployment</li>
+    <li class="pass">GET /api/metrics returns list; GET /api/metrics?deploymentId= filters</li>
+    <li class="pass">GET /api/metrics/by-deployment/{id} returns one or 404</li>
+    <li class="pass">nq_metrics.strategy_metrics_job: compute from trades, upsert strategy_metrics</li>
+    <li class="pass">Metrics: WinRate, PnL, Trades, Days, Profit Factor, Max Drawdown exposed</li>
+  </ul>
+  <p><strong>Result:</strong> PASS</p>
+</body>
+</html>

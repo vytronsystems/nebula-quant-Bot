@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 71 — Audit Report</title>
+  <style>body{font-family:system-ui;margin:1rem;}</style>
+</head>
+<body>
+  <h1>Phase 71 — Audit Report</h1>
+  <p><strong>Phase:</strong> 71 — Binance Testnet Integration</p>
+  <ul>
+    <li>Config: Env-only (BINANCE_API_KEY, BINANCE_API_SECRET, BINANCE_TESTNET, testnet URLs). No hardcoded secrets.</li>
+    <li>Fail-closed: Client and API only use testnet when BINANCE_TESTNET=true; client raises when testnet=false or creds missing.</li>
+    <li>Degraded: get_venue_status_safe and API return NOT_CONFIGURED/ERROR without crashing; 502 from control plane proxy when Binance API unavailable.</li>
+    <li>Read-only: No order submission in testnet client; account, market, orderbook, trades, orders, positions are GET-only.</li>
+    <li>Control plane proxy: GET /api/binance/* forwards to BINANCE_API_URL (binance-api:8082 in Docker).</li>
+  </ul>
+  <p><strong>Status:</strong> OK.</p>
+</body>
+</html>

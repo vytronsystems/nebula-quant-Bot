@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 74 — Audit Report</title>
+  <style>body{font-family:system-ui;margin:1rem;}</style>
+</head>
+<body>
+  <h1>Phase 74 — Audit Report</h1>
+  <p><strong>Phase:</strong> 74 — Metrics Engine</p>
+  <ul>
+    <li>Deterministic: Same trades input yields same metrics via MetricsEngine.</li>
+    <li>Fail-closed: Read-only API; job only writes to strategy_metrics; no trading path.</li>
+    <li>Architecture: Metrics stored per deployment; UI and recommendation engine consume via /api/metrics.</li>
+    <li>Code integrity: No secrets; PG_DSN from env.</li>
+    <li>Dependencies: Uses existing nq_metrics engine and psycopg.</li>
+  </ul>
+  <p><strong>Status:</strong> OK</p>
+</body>
+</html>

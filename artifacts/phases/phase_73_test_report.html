@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 73 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} .pass{color:green;}</style>
+</head>
+<body>
+  <h1>Phase 73 — Test Report</h1>
+  <p><strong>Phase:</strong> 73 — Promotion Queue UI</p>
+  <ul>
+    <li class="pass">Promotion Queue page loads at /operator/promotion-queue</li>
+    <li class="pass">Deployments fetched from GET /api/deployments</li>
+    <li class="pass">Table shows Strategy, Instrument, Venue, Stage, WinRate, PnL, Trades, Days, Actions</li>
+    <li class="pass">Promote to Live / Move to Paper / Move to Backtest buttons present</li>
+    <li class="pass">Action: PATCH deployment stage + POST promotion-review (audit trail)</li>
+    <li class="pass">Operator Cockpit has Promotion Queue card</li>
+  </ul>
+  <p><strong>Result:</strong> PASS</p>
+</body>
+</html>

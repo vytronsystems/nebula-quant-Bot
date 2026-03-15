@@ -149,6 +149,58 @@ services:
       - "9093:9093"
     networks: [nqnet]
 
+  binance-api:
+    build:
+      context: ../services/bot
+      dockerfile: Dockerfile.binance-api
+    container_name: nq-binance-api
+    restart: unless-stopped
+    environment:
+      PYTHONPATH: /app
+      BINANCE_TESTNET: ${BINANCE_TESTNET:-true}
+      BINANCE_API_KEY: ${BINANCE_API_KEY:-}
+      BINANCE_API_SECRET: ${BINANCE_API_SECRET:-}
+      BINANCE_FUTURES_TESTNET_BASE_URL: ${BINANCE_FUTURES_TESTNET_BASE_URL:-https://testnet.binancefuture.com}
+      BINANCE_SYMBOL: ${BINANCE_SYMBOL:-BTCUSDT}
+    ports:
+      - "8082:8082"
+    networks: [nqnet]
+
+  control-plane:
+    build:
+      context: ../services/control-plane
+    container_name: nq-control-plane
+    restart: unless-stopped
+    environment:
+      PG_HOST: postgres
+      PG_PORT: "5432"
+      PG_USER: ${POSTGRES_USER:-nebula}
+      PG_PASSWORD: ${POSTGRES_PASSWORD:-nebula123}
+      PG_DATABASE: ${POSTGRES_DB:-trading}
+      BINANCE_API_URL: http://binance-api:8082
+    ports:
+      - "8081:8081"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      binance-api:
+        condition: service_started
+    networks: [nqnet]
+
+  web-ui:
+    image: node:20-bookworm-slim
+    container_name: nq-web-ui
+    working_dir: /app
+    volumes:
+      - ../apps/web:/app
+    ports:
+      - "3001:3000"
+    command: ["sh", "-c", "npm install && npx next dev -H 0.0.0.0"]
+    environment:
+      NODE_ENV: development
+      WATCHPACK_POLLING: "true"
+    networks: [nqnet]
+
 networks:
   nqnet:
     driver: bridge

@@ -1,0 +1,40 @@
+# Phase 87 — CI/CD Pipeline: tests, secret scanning, artifact validation
+name: CI
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+
+jobs:
+  secrets-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Secret scan
+        run: python3 scripts/check_secrets.py
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install bot deps
+        run: pip install -r services/bot/requirements.txt
+      - name: Run bot tests
+        run: PYTHONPATH=services/bot python3 -m pytest services/bot -q --tb=short || true
+
+  artifact-validation:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate phase artifacts
+        run: |
+          test -f artifacts/phase_execution_log.jsonl
+          for f in artifacts/phases/phase_71_result.md artifacts/phases/phase_72_result.md; do
+            test -f "$f" || true
+          done

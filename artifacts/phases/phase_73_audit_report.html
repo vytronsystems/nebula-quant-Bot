@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 73 — Audit Report</title>
+  <style>body{font-family:system-ui;margin:1rem;}</style>
+</head>
+<body>
+  <h1>Phase 73 — Audit Report</h1>
+  <p><strong>Phase:</strong> 73 — Promotion Queue UI</p>
+  <ul>
+    <li>Deterministic: Stage changes and promotion-review entries are persisted; replay from DB is consistent.</li>
+    <li>Fail-closed: No live trading enable without explicit operator action; approval logged.</li>
+    <li>Architecture: UI uses control plane APIs; promotion_review table used as specified in evidence backbone.</li>
+    <li>Code integrity: No secrets; API base from env (NEXT_PUBLIC_CONTROL_PLANE_URL).</li>
+    <li>Dependencies: No new runtime dependencies.</li>
+  </ul>
+  <p><strong>Status:</strong> OK</p>
+</body>
+</html>

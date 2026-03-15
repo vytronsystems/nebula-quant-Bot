@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 71 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} .pass{color:green;} .skip{color:gray;}</style>
+</head>
+<body>
+  <h1>Phase 71 — Test Report</h1>
+  <p><strong>Phase:</strong> 71 — Binance Testnet Integration</p>
+  <ul>
+    <li class="pass">Config: NOT_CONFIGURED when BINANCE_TESTNET not true — unit test</li>
+    <li class="pass">Config: NOT_CONFIGURED when API key/secret missing — unit test</li>
+    <li class="pass">get_venue_status_safe: returns NOT_CONFIGURED when testnet false or creds missing</li>
+    <li class="pass">BinanceTestnetClient: raises BinanceTestnetClientError when testnet=false (fail-closed)</li>
+    <li class="pass">BinanceTestnetClient: raises when creds missing</li>
+    <li class="skip">Live testnet connectivity: manual with BINANCE_API_KEY/SECRET and BINANCE_TESTNET=true</li>
+    <li>API endpoints: /health, /venue-overview, /account, /market, /orderbook, /trades, /orders, /positions — implemented (Python + control plane proxy)</li>
+  </ul>
+  <p><strong>Result:</strong> PASS (unit tests; live testnet requires env credentials).</p>
+</body>
+</html>

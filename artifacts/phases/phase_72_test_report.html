@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 72 — Test Report</title>
+  <style>body{font-family:system-ui;margin:1rem;} .pass{color:green;} .fail{color:red;}</style>
+</head>
+<body>
+  <h1>Phase 72 — Test Report</h1>
+  <p><strong>Phase:</strong> 72 — Strategy Deployment Registry</p>
+  <ul>
+    <li class="pass">Migration 004: strategy_deployment table and indexes created</li>
+    <li class="pass">Control plane: StrategyDeployment entity maps to strategy_deployment</li>
+    <li class="pass">GET /api/deployments returns list (empty or filtered)</li>
+    <li class="pass">POST /api/deployments creates record with strategyName, version, instrument, venue, environment, stage</li>
+    <li class="pass">PATCH /api/deployments/{id} updates stage, environment, enabled</li>
+    <li class="pass">Multiple strategies per instrument supported (unique on name+version+instrument+venue)</li>
+  </ul>
+  <p><strong>Result:</strong> PASS</p>
+</body>
+</html>

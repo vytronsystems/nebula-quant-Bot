@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Phase 72 — Audit Report</title>
+  <style>body{font-family:system-ui;margin:1rem;}</style>
+</head>
+<body>
+  <h1>Phase 72 — Audit Report</h1>
+  <p><strong>Phase:</strong> 72 — Strategy Deployment Registry</p>
+  <ul>
+    <li>Deterministic: Registry is persisted in Postgres; list/create/patch behavior is deterministic.</li>
+    <li>Fail-closed: No trading or credential selection in this phase; registry is metadata only.</li>
+    <li>Architecture: Aligns with existing control-plane pattern (JPA entity, repository, DTO, REST controller).</li>
+    <li>Code integrity: No secrets; validation on required fields (strategyName, strategyVersion, instrument, venue).</li>
+    <li>Dependencies: Uses existing Spring Data JPA and Postgres; no new runtime dependencies.</li>
+  </ul>
+  <p><strong>Status:</strong> OK</p>
+</body>
+</html>
