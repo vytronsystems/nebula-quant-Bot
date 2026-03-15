@@ -115,6 +115,23 @@ class BinanceTestnetClient:
         )
         return out if isinstance(out, list) else []
 
+    def get_klines(
+        self,
+        symbol: str = "BTCUSDT",
+        interval: str = "5m",
+        limit: int = 100,
+        start_time: int | None = None,
+        end_time: int | None = None,
+    ) -> list[list[Any]]:
+        """GET /fapi/v1/klines — public. Returns list of [open_time, open, high, low, close, volume, ...]."""
+        params: dict[str, str] = {"symbol": symbol, "interval": interval, "limit": str(min(limit, 1500))}
+        if start_time is not None:
+            params["startTime"] = str(start_time)
+        if end_time is not None:
+            params["endTime"] = str(end_time)
+        out = _get(self._config.rest_base_url, "/fapi/v1/klines", params=params)
+        return out if isinstance(out, list) else []
+
     def get_open_orders(self, symbol: str = "BTCUSDT") -> list[dict[str, Any]]:
         """GET /fapi/v1/openOrders — signed."""
         out = _get(

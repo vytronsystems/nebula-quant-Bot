@@ -28,12 +28,15 @@ curl -X POST http://localhost:8081/api/instruments \
 - **To enable**: Set env vars on the binance-api service: `BINANCE_TESTNET=true`, `BINANCE_API_KEY`, `BINANCE_API_SECRET`.
 - **Endpoints**: /account, /market, /orderbook, /trades, /orders, /positions — all proxy through control-plane to binance-api.
 
-## 15-Day Paper Run
+## 15-Day Paper Run / Automatic Paper Runner
 
 - Deployment meta includes `paper_run_days: 15`.
-- Paper execution is workflow-triggered (research pipeline, scheduler) rather than a standalone daemon.
-- Data is persisted in `trades` and `paper_trading_daily_snapshot` as sessions run.
-- To continue the run: invoke paper sessions via the research pipeline or a scheduled job.
+- **Automatic execution**: The bot runs a **paper runner** every N heartbeats (default: every 6 heartbeats ≈ 60s when HEARTBEAT_SECONDS=10). It:
+  - Loads deployments with `stage=paper` and `enabled=true`
+  - Ensures the instrument is active in the instrument registry
+  - For venue Binance: fetches klines from Binance Testnet (requires `BINANCE_API_KEY`/`BINANCE_API_SECRET` in binance-api or bot env), runs a minimal paper session, and persists trades to the `trades` table
+  - Triggers the strategy metrics job so `/api/metrics` and recommendations update
+- Tune via env: `PAPER_RUNNER_INTERVAL_HEARTBEATS` (0 = disabled). Data accumulates in `trades` and `paper_trading_daily_snapshot` over the 15-day window.
 
 ## Metrics
 

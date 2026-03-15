@@ -9,6 +9,7 @@ from bot.utils.retry import retry
 from bot.config import (
     NQ_ENV, NQ_VERSION, NQ_SYMBOL, NQ_TIMEFRAME,
     HEARTBEAT_SECONDS, SNAPSHOT_EVERY_N_HEARTBEATS,
+    PAPER_RUNNER_INTERVAL_HEARTBEATS,
 )
 from bot.audit.logger import start_run, log_no_trade, end_run
 
@@ -45,6 +46,20 @@ def _inc_heartbeat_safe():
         HEARTBEATS_TOTAL.inc()
     except Exception:
         pass
+
+
+def _run_paper_runner_safe():
+    """Run automatic paper sessions for deployments that meet input requirements. Non-fatal."""
+    try:
+        from nq_paper.runner import run_paper_for_deployments
+        res = run_paper_for_deployments()
+        if res.get("deployments_run", 0) > 0:
+            logger.info(f"Paper runner: deployments_run={res.get('deployments_run')}, trades_persisted={res.get('trades_persisted', 0)}")
+        if res.get("errors"):
+            for err in res["errors"][:3]:
+                logger.warning(f"Paper runner: {err}")
+    except Exception as e:
+        logger.warning(f"Paper runner (non-fatal): {e!r}")
 
 
 def _smoke_tests(pg_dsn: str, r_host: str) -> None:
@@ -86,7 +101,7 @@ def main():
     logger.info(f"PG_DSN={pg_dsn}")
     logger.info(f"REDIS_HOST={r_host}")
     logger.info(f"NQ_ENV={NQ_ENV} NQ_VERSION={NQ_VERSION} NQ_SYMBOL={NQ_SYMBOL} NQ_TIMEFRAME={NQ_TIMEFRAME}")
-    logger.info(f"HEARTBEAT_SECONDS={HEARTBEAT_SECONDS} SNAPSHOT_EVERY_N_HEARTBEATS={SNAPSHOT_EVERY_N_HEARTBEATS}")
+    logger.info(f"HEARTBEAT_SECONDS={HEARTBEAT_SECONDS} SNAPSHOT_EVERY_N_HEARTBEATS={SNAPSHOT_EVERY_N_HEARTBEATS} PAPER_RUNNER_INTERVAL={PAPER_RUNNER_INTERVAL_HEARTBEATS}")
 
     # metrics: safe, never fatal
     _start_metrics_safe(int(os.getenv("METRICS_PORT", "8080")))
@@ -111,6 +126,9 @@ def main():
 
                 retry(persist_snapshot, name="log_no_trade")
                 logger.info("DecisionSnapshot persisted (no_trade).")
+
+            if PAPER_RUNNER_INTERVAL_HEARTBEATS > 0 and (hb % PAPER_RUNNER_INTERVAL_HEARTBEATS == 0):
+                _run_paper_runner_safe()
 
             time.sleep(HEARTBEAT_SECONDS)
             _inc_heartbeat_safe()

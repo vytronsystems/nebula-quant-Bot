@@ -17,3 +17,6 @@ HEARTBEAT_SECONDS = int(env("HEARTBEAT_SECONDS", "10"))
 
 # IMPORTANT: snapshot throttling (reduce DB spam)
 SNAPSHOT_EVERY_N_HEARTBEATS = int(env("SNAPSHOT_EVERY_N_HEARTBEATS", "6"))  # default: 60s
+
+# Paper runner: run paper sessions for eligible deployments every N heartbeats (0 = disabled)
+PAPER_RUNNER_INTERVAL_HEARTBEATS = int(env("PAPER_RUNNER_INTERVAL_HEARTBEATS", "6"))  # default: every 60s

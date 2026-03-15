@@ -22,28 +22,28 @@ fi
 echo "== backup =="
 cp -v "$CFG" "$BK"
 
-echo "== write telegram alertmanager config =="
+echo "== write alertmanager config (webhook -> Telegram) =="
+# Official Alertmanager has no telegram_configs; we use webhook -> telegram_webhook service
 cat > "$CFG" <<YAML
 global:
   resolve_timeout: 5m
 
 route:
-  receiver: telegram
+  receiver: telegram_webhook
   group_wait: 10s
   group_interval: 1m
   repeat_interval: 3h
 
 receivers:
-- name: telegram
-  telegram_configs:
-  - bot_token: "${TOKEN}"
-    chat_id: ${CHAT}
-    parse_mode: "Markdown"
+- name: telegram_webhook
+  webhook_configs:
+  - url: http://telegram-webhook:9094/webhook
     send_resolved: true
 YAML
 
-echo "== restart alertmanager =="
+echo "== (re)start telegram-webhook and alertmanager =="
+docker compose up -d --no-deps telegram-webhook 2>/dev/null || true
 docker compose up -d --no-deps --force-recreate alertmanager
 
 echo "== status =="
-docker compose ps alertmanager
+docker compose ps alertmanager telegram-webhook 2>/dev/null || docker compose ps alertmanager
